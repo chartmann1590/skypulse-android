@@ -36,13 +36,14 @@ data class AirportsUiState(
     val isImporting: Boolean = true,
 )
 
-enum class FlightRole { ARRIVING, DEPARTING }
+/** ARRIVING/DEPARTING are routed to/from the airport; NEARBY is in the area (route unknown). */
+enum class FlightRole { ARRIVING, DEPARTING, NEARBY }
 
-/** A flight that is arriving at or departing from the focused airport. */
+/** A flight shown for a focused airport. [route] is non-null only when routed to/from it. */
 data class AirportFlight(
     val aircraft: Aircraft,
     val role: FlightRole,
-    val route: FlightRoute,
+    val route: FlightRoute?,
 )
 
 @HiltViewModel
@@ -129,26 +130,31 @@ class AirportViewModel @Inject constructor(
 
     private suspend fun loadAirportFlights(airport: Airport): List<AirportFlight> {
         val result = remoteDataSource.fetchFromAdsbLol(airport.latitude, airport.longitude, AIRPORT_RADIUS_NM)
-        val candidates = (result as? FetchResult.Success)?.aircraft.orEmpty()
-            .filter { !it.callsign.isNullOrBlank() }
+        val all = (result as? FetchResult.Success)?.aircraft.orEmpty()
             .sortedBy { it.distanceNm ?: Double.MAX_VALUE }
-            .take(MAX_ROUTE_LOOKUPS)
 
-        return coroutineScope {
-            candidates.map { ac -> async { ac to routeRepository.routeForCallsign(ac.callsign) } }
+        // Look up routes for the nearest flights that have a callsign (bounded).
+        val lookupTargets = all.filter { !it.callsign.isNullOrBlank() }.take(MAX_ROUTE_LOOKUPS)
+        val routeByCallsign: Map<String, FlightRoute> = coroutineScope {
+            lookupTargets.map { ac -> async { ac.callsign!!.trim() to routeRepository.routeForCallsign(ac.callsign) } }
                 .awaitAll()
-                .mapNotNull { (ac, route) ->
-                    if (route == null) return@mapNotNull null
-                    when {
-                        airport.matches(route.destination.iata, route.destination.icao) ->
-                            AirportFlight(ac, FlightRole.ARRIVING, route)
-                        airport.matches(route.origin.iata, route.origin.icao) ->
-                            AirportFlight(ac, FlightRole.DEPARTING, route)
-                        else -> null
-                    }
-                }
-                .sortedWith(compareBy({ it.role }, { it.aircraft.distanceNm ?: Double.MAX_VALUE }))
+                .mapNotNull { (cs, route) -> route?.let { cs.uppercase() to it } }
+                .toMap()
         }
+
+        // Classify every nearby flight: arriving/departing if its route matches, else nearby.
+        return all.take(MAX_DISPLAY).map { ac ->
+            val route = ac.callsign?.trim()?.uppercase()?.let { routeByCallsign[it] }
+            val role = when {
+                route != null && airport.matches(route.destination.iata, route.destination.icao) -> FlightRole.ARRIVING
+                route != null && airport.matches(route.origin.iata, route.origin.icao) -> FlightRole.DEPARTING
+                else -> FlightRole.NEARBY
+            }
+            AirportFlight(ac, role, if (role == FlightRole.NEARBY) null else route)
+        }.sortedWith(
+            // Routed to/from first (ARRIVING, DEPARTING), then nearby; each by distance.
+            compareBy({ it.role.ordinal }, { it.aircraft.distanceNm ?: Double.MAX_VALUE }),
+        )
     }
 
     private fun Airport.matches(iataCode: String?, icaoCode: String?): Boolean {
@@ -202,9 +208,12 @@ class AirportViewModel @Inject constructor(
     fun retryLoad() = loadNearbyAndFeatured()
 
     companion object {
-        /** Radius searched around an airport for inbound/outbound flights. */
-        private const val AIRPORT_RADIUS_NM = 120
-        /** Cap on route lookups per airport to bound network calls. */
-        private const val MAX_ROUTE_LOOKUPS = 40
+        /** Radius searched around an airport for inbound/outbound flights (NM). Wider so
+         *  arrivals still descending and departures climbing out are caught. */
+        private const val AIRPORT_RADIUS_NM = 175
+        /** Cap on parallel route lookups per airport to bound network calls. */
+        private const val MAX_ROUTE_LOOKUPS = 60
+        /** Max flights shown in the sheet. */
+        private const val MAX_DISPLAY = 60
     }
 }

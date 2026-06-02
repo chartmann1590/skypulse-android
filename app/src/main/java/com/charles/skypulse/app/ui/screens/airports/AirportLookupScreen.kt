@@ -159,22 +159,37 @@ fun AirportLookupScreen(viewModel: AirportViewModel = hiltViewModel()) {
                 modifier = Modifier.fillMaxWidth().padding(16.dp).padding(bottom = 24.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
+                val routed = focusFlights.count { it.role != FlightRole.NEARBY }
                 Text(
-                    "Arrivals & departures · ${focus!!.code}",
+                    "Flights · ${focus!!.code}",
                     style = SkyType.TitleMd,
                     color = SkyColors.TextHigh,
                 )
+                if (!focusLoading && focusFlights.isNotEmpty()) {
+                    Text(
+                        if (routed > 0) "$routed arriving/departing · ${focusFlights.size - routed} other nearby"
+                        else "No routed arrivals/departures matched — showing nearby flights",
+                        style = SkyType.LabelSm,
+                        color = SkyColors.OnSurfaceVariant,
+                    )
+                }
                 when {
                     focusLoading -> LoadingState(message = "Finding arriving & departing flights…")
                     focusFlights.isEmpty() -> EmptyState(
                         icon = Icons.Filled.FlightTakeoff,
-                        title = "No arrivals or departures right now",
-                        subtitle = "We only show flights routed to/from this airport. Free route data can be incomplete, and quiet airports may have none at the moment.",
+                        title = "No aircraft right now",
+                        subtitle = "Open ADS-B coverage varies by area and time. Try again shortly.",
                     )
-                    else -> focusFlights.take(30).forEach { flight ->
+                    else -> focusFlights.forEach { flight ->
                         val subtitle = when (flight.role) {
-                            FlightRole.ARRIVING -> "Arriving · from ${flight.route.origin.code}"
-                            FlightRole.DEPARTING -> "Departing · to ${flight.route.destination.code}"
+                            FlightRole.ARRIVING -> "Arriving · from ${flight.route?.origin?.code}"
+                            FlightRole.DEPARTING -> "Departing · to ${flight.route?.destination?.code}"
+                            FlightRole.NEARBY -> "Nearby · ${flight.aircraft.typeCode ?: "in the area"}"
+                        }
+                        val accent = when (flight.role) {
+                            FlightRole.ARRIVING -> SkyColors.PrimaryFixedDim
+                            FlightRole.DEPARTING -> SkyColors.Secondary
+                            FlightRole.NEARBY -> SkyColors.Outline
                         }
                         AircraftListItem(
                             aircraft = flight.aircraft,
@@ -183,7 +198,7 @@ fun AirportLookupScreen(viewModel: AirportViewModel = hiltViewModel()) {
                             speedUnit = settings.speedUnit,
                             onClick = { viewModel.select(flight.aircraft) },
                             subtitle = subtitle,
-                            accent = if (flight.role == FlightRole.ARRIVING) SkyColors.PrimaryFixedDim else SkyColors.Secondary,
+                            accent = accent,
                         )
                     }
                 }
