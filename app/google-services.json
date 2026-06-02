@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "871581888905",
+    "project_id": "skypulse-tracker-2026",
+    "storage_bucket": "skypulse-tracker-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:871581888905:android:8978a42feb3762ab10f158",
+        "android_client_info": {
+          "package_name": "com.charles.skypulse.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAusW-z3dYxPjIr4zNUDFXucuzDqOwjM2I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

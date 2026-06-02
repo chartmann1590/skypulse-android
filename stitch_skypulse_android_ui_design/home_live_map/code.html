@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SkyPulse - Live Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#002ccd",
+                        "on-tertiary-fixed": "#221b00",
+                        "on-secondary": "#001d93",
+                        "surface-dim": "#0e131e",
+                        "surface-container-highest": "#303541",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#1b1f2b",
+                        "text-high": "#FFFFFF",
+                        "on-secondary-container": "#b1bbff",
+                        "primary-fixed-dim": "#00dbe7",
+                        "primary-container": "#00f2ff",
+                        "on-primary-fixed": "#002022",
+                        "alert-red": "#FF3D00",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#554500",
+                        "surface-container-high": "#252a36",
+                        "error": "#ffb4ab",
+                        "background": "#0e131e",
+                        "secondary": "#bbc3ff",
+                        "surface-container-low": "#171b27",
+                        "primary": "#e1fdff",
+                        "surface-variant": "#303541",
+                        "tertiary": "#fff6e4",
+                        "tertiary-fixed": "#ffe173",
+                        "on-tertiary": "#3b2f00",
+                        "on-primary": "#00363a",
+                        "on-surface-variant": "#b9cacb",
+                        "glass-surface": "rgba(20, 66, 114, 0.15)",
+                        "text-med": "#BFBFBF",
+                        "on-surface": "#dee2f2",
+                        "surface-bright": "#343946",
+                        "surface": "#0e131e",
+                        "outline": "#849495",
+                        "glass-stroke": "rgba(255, 255, 255, 0.1)",
+                        "on-background": "#dee2f2",
+                        "surface-tint": "#00dbe7",
+                        "on-primary-fixed-variant": "#004f54",
+                        "outline-variant": "#3a494b",
+                        "surface-container-lowest": "#090e19",
+                        "inverse-surface": "#dee2f2",
+                        "inverse-primary": "#00696f",
+                        "inverse-on-surface": "#2b303c",
+                        "on-secondary-fixed": "#000f5d",
+                        "tertiary-container": "#fed83a",
+                        "on-tertiary-container": "#725e00",
+                        "tertiary-fixed-dim": "#e8c423",
+                        "on-primary-container": "#006a71",
+                        "primary-fixed": "#74f5ff",
+                        "pitch-black": "#05070A",
+                        "secondary-fixed": "#dee0ff",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "secondary-container": "#0231de",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "card-padding": "20px",
+                        "base": "8px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-lg": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Sora"],
+                        "display-lg": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-lg": ["18px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>body {
+    background-color: #05070A;
+    color: #dee2f2;
+    overflow: hidden;
+    /* Prevent scrolling on full-screen map */
+    }
+/* Map Background Simulation */
+.map-bg {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuCsiH4hTc8sDNHnZ1v3SpdGYWbHXN7mjz4zYDSqfQbjlLFEOXvPQ4HR85udqcKxtskbGxbRVBtRB1QKdKk5YHLf2dZq4fjmRRnCNdfZ6Gs8bNdTG34ztrDNHxNlnowIxCYR4Tt84d0ND43b5V84BqyQGozcyXvZqEd2hAI9EYI2c6AReDPmJtHwQ8ZAZyPyWANClo8nKqaovAawxBgPcYm2XJpfLtcFdlHXb7xaCNCqnTOudbIWaJCxGb3_OX6kbPKULPna5Y5sWMX9);
+    background-size: cover;
+    background-position: center;
+    filter: grayscale(80%) brightness(0.4) contrast(1.2) sepia(20%) hue-rotate(180deg)
+    }
+/* Glowing effects for active elements */
+.glow-active {
+    filter: drop-shadow(0 0 8px rgba(0, 219, 231, 0.5))
+    }
+.hud-panel {
+    background-color: rgba(20, 66, 114, 0.15);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1)
+    }
+/* Aircraft Icons on Map */
+.aircraft-marker {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform-origin: center
+    }
+.aircraft-icon {
+    color: #e1fdff;
+    filter: drop-shadow(0 0 4px rgba(225, 253, 255, 0.8));
+    transform: rotate(45deg);
+    /* Pointing roughly NE */
+    }
+.aircraft-label {
+    background-color: rgba(5, 7, 10, 0.7);
+    border: 1px solid rgba(0, 219, 231, 0.3);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-top: 4px;
+    white-space: nowrap
+    }
+.trail {
+    position: absolute;
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(to bottom, rgba(225, 253, 255, 0.4), transparent);
+    top: 20px;
+    left: 50%;
+    transform: translatex(-50%) rotate(180deg);
+    transform-origin: top
+    }</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-screen w-screen relative">
+<!-- Full Screen Map Background -->
+<div class="absolute inset-0 map-bg z-0" data-alt="A highly detailed, futuristic dark-mode satellite map interface. The map shows a stylized cityscape from directly above, rendered in deep midnight blues and desaturated grays. Subtle, glowing cyan gridlines overlay the terrain, reinforcing a high-tech aviation aesthetic. The overall mood is precise, technical, and atmospheric, reminiscent of advanced air traffic control radar systems."></div>
+<!-- Top Navigation AppBar (Desktop) / Hidden on Mobile -->
+<header class="hidden md:flex bg-glass-surface backdrop-blur-xl border-b border-glass-stroke fixed top-0 w-full z-50 justify-between items-center px-margin-desktop h-16">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-2xl cursor-pointer hover:bg-primary/10 transition-colors p-2 rounded-full">menu</span>
+<h1 class="font-display-lg text-headline-lg text-primary tracking-tight font-bold">SkyPulse</h1>
+</div>
+<!-- Desktop Nav Links -->
+<nav class="flex gap-8">
+<a class="font-title-md text-title-md text-primary glow-active" href="#">Map</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary/80 transition-all" href="#">Nearby</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary/80 transition-all" href="#">Airports</a>
+<a class="font-title-md text-title-md text-on-surface-variant hover:text-primary/80 transition-all" href="#">Alerts</a>
+</nav>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-glass-stroke">
+<img alt="User profile picture" class="w-full h-full object-cover" data-alt="A small, circular avatar portrait of a professional-looking individual against a neutral dark background. The lighting is soft and studio-quality. The image is cropped tightly to the face and shoulders, fitting perfectly within a rounded profile picture component." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAR1BeonTTLE8h9f0Jt6yAZ012JDoa6_nOczDsVoUgI0-ItcFOUkpMM6D6yDnEL4hV1-KtmLNBf_lSGgrQeIMy1gVWeOgbkvA22GrOZvsPCJ3nPHwAAsNcj_4iyA71NkOg7ikIeUI3hj73ZnAdFt-NZ7A8eVkyJcGe_Brp2asR4xEKCVYZ-RbizC5hkD3wneBIcU7RADU-ny-EBsFGfNFgDoQaxvUnrvlMWvjKqLB28S6pmXNX69UXQZos2R63YagzdDk40DKHnqArH"/>
+</div>
+</header>
+<!-- Floating Search Bar -->
+<div class="absolute top-margin-mobile md:top-24 left-margin-mobile right-margin-mobile md:left-1/2 md:transform md:-translate-x-1/2 md:w-full md:max-w-2xl z-40">
+<div class="hud-panel rounded-full flex items-center px-4 py-3 shadow-lg">
+<span class="material-symbols-outlined text-on-surface-variant mr-3">search</span>
+<input class="bg-transparent border-none text-on-surface focus:ring-0 w-full font-body-md text-body-md placeholder:text-on-surface-variant/50 outline-none" placeholder="Search flight, airport, aircraft..." type="text"/>
+</div>
+</div>
+<!-- Map Canvas Area (Aircraft Markers) -->
+<div class="absolute inset-0 z-10 pointer-events-none">
+<!-- Aircraft 1 -->
+<div class="aircraft-marker" style="top: 30%; left: 40%;">
+<span class="material-symbols-outlined aircraft-icon text-2xl" style="font-variation-settings: 'FILL' 1;">flight</span>
+<div class="trail"></div>
+<div class="aircraft-label font-data-lg text-[10px] text-primary">UAL123</div>
+</div>
+<!-- Aircraft 2 -->
+<div class="aircraft-marker" style="top: 55%; left: 65%; transform: rotate(15deg);">
+<span class="material-symbols-outlined aircraft-icon text-2xl" style="font-variation-settings: 'FILL' 1;">flight</span>
+<div class="trail"></div>
+<div class="aircraft-label font-data-lg text-[10px] text-primary">DAL456</div>
+</div>
+<!-- Aircraft 3 -->
+<div class="aircraft-marker" style="top: 70%; left: 25%; transform: rotate(-30deg);">
+<span class="material-symbols-outlined aircraft-icon text-2xl" style="font-variation-settings: 'FILL' 1;">flight</span>
+<div class="trail"></div>
+<div class="aircraft-label font-data-lg text-[10px] text-primary">DLH987</div>
+</div>
+<!-- Target Aircraft (Highlighted) -->
+<div class="aircraft-marker z-20" style="top: 45%; left: 50%; transform: rotate(80deg);">
+<span class="material-symbols-outlined text-alert-red text-3xl filter drop-shadow-[0_0_8px_rgba(255,61,0,0.8)]" style="font-variation-settings: 'FILL' 1;">flight</span>
+<div class="trail" style="background: linear-gradient(to bottom, rgba(255, 61, 0, 0.4), transparent);"></div>
+<div class="aircraft-label font-data-lg text-[12px] text-alert-red border-alert-red/50 bg-pitch-black/80 font-bold">AAL432</div>
+</div>
+</div>
+<!-- Right Side Floating Action Buttons -->
+<div class="absolute right-margin-mobile bottom-40 md:bottom-32 flex flex-col gap-4 z-40">
+<button class="w-12 h-12 rounded-full hud-panel flex items-center justify-center text-primary hover:bg-primary/10 transition-colors active:scale-95 shadow-lg group">
+<span class="material-symbols-outlined group-hover:glow-active transition-all">my_location</span>
+</button>
+<button class="w-12 h-12 rounded-full hud-panel flex items-center justify-center text-primary hover:bg-primary/10 transition-colors active:scale-95 shadow-lg group">
+<span class="material-symbols-outlined group-hover:glow-active transition-all">tune</span>
+</button>
+</div>
+<!-- Bottom Info Card (Docked above Nav) -->
+<div class="absolute bottom-24 md:bottom-8 left-margin-mobile right-margin-mobile md:left-margin-desktop md:w-96 z-40">
+<div class="hud-panel rounded-xl p-card-padding flex flex-col gap-3">
+<div class="flex justify-between items-center border-b border-glass-stroke pb-2">
+<h2 class="font-title-md text-title-md text-on-surface">Aircraft Nearby</h2>
+<span class="font-data-lg text-data-lg text-primary">12 planes</span>
+</div>
+<!-- Closest Aircraft Mini-Card -->
+<div class="bg-surface-container-low rounded-lg p-3 border border-outline-variant flex items-center justify-between cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-alert-red/20 flex items-center justify-center border border-alert-red/30">
+<span class="material-symbols-outlined text-alert-red text-sm" style="font-variation-settings: 'FILL' 1;">flight</span>
+</div>
+<div class="flex flex-col">
+<span class="font-data-lg text-title-md text-on-surface font-bold tracking-wider">AAL432</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase mt-1">Boeing 737-800</span>
+</div>
+</div>
+<div class="flex flex-col items-end text-right">
+<span class="font-data-lg text-data-lg text-primary">3.2 mi</span>
+<span class="font-data-lg text-label-sm text-text-med">12,000 ft</span>
+</div>
+</div>
+<div class="text-right mt-1">
+<span class="font-label-sm text-label-sm text-on-surface-variant/70 italic flex items-center justify-end gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                    Updated just now
+                </span>
+</div>
+</div>
+</div>
+<!-- Mobile BottomNavBar -->
+<nav class="md:hidden bg-glass-surface backdrop-blur-xl border-t border-glass-stroke fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 rounded-t-xl">
+<!-- Active Tab: Map -->
+<a class="flex flex-col items-center justify-center text-primary filter drop-shadow-[0_0_8px_rgba(0,219,231,0.5)] active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl mb-1" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="font-label-sm text-label-sm font-label-sm text-label-sm">Map</span>
+</a>
+<!-- Inactive Tabs -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl mb-1">explore</span>
+<span class="font-label-sm text-label-sm font-label-sm text-label-sm">Nearby</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl mb-1">local_airport</span>
+<span class="font-label-sm text-label-sm font-label-sm text-label-sm">Airports</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl mb-1">notifications</span>
+<span class="font-label-sm text-label-sm font-label-sm text-label-sm">Alerts</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined text-2xl mb-1">bookmark</span>
+<span class="font-label-sm text-label-sm font-label-sm text-label-sm">Saved</span>
+</a>
+</nav>
+</body></html>

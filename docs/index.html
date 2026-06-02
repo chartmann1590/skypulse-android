@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkyPulse — Live aircraft tracker, free & open</title>
+<meta name="description" content="SkyPulse is a native Android live aircraft tracker built with Kotlin & Jetpack Compose, using only free open ADS-B data. No API key, no login." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --pitch:#05070A; --bg:#0E131E; --surface:#171B27; --surface2:#1B1F2B;
+    --cyan:#00DBE7; --cyan-bright:#00F2FF; --on:#DEE2F2; --muted:#B9CACB;
+    --stroke:rgba(255,255,255,.10); --glass:rgba(20,66,114,.15); --red:#FF3D00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--pitch);color:var(--on);font-family:Inter,system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+  .glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(60% 50% at 70% 0%, rgba(0,219,231,.12), transparent 60%),
+               radial-gradient(50% 40% at 10% 30%, rgba(2,49,222,.10), transparent 60%)}
+  header,main,footer{position:relative;z-index:1}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0}
+  .brand{font-family:Sora;font-weight:700;font-size:24px;color:var(--cyan);letter-spacing:-.01em}
+  .nav-links a{margin-left:24px;color:var(--muted);font-size:15px}
+  .nav-links a:hover{color:var(--cyan)}
+  .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center;padding:64px 0 48px}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono';font-size:12px;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--cyan);background:var(--surface);border:1px solid var(--stroke);
+    border-radius:999px;padding:6px 14px}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+  h1{font-family:Sora;font-weight:700;font-size:52px;line-height:1.08;letter-spacing:-.02em;margin:20px 0 16px}
+  h1 .accent{color:var(--cyan)}
+  .sub{font-size:18px;color:var(--muted);max-width:48ch}
+  .cta{display:flex;gap:16px;margin-top:32px;flex-wrap:wrap}
+  .btn{border-radius:999px;padding:14px 26px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;gap:8px}
+  .btn-primary{background:var(--cyan);color:#00363A;box-shadow:0 4px 24px rgba(0,219,231,.25)}
+  .btn-ghost{border:1px solid var(--stroke);color:var(--on);background:var(--surface)}
+  .phone{justify-self:center;border:1px solid var(--stroke);border-radius:36px;overflow:hidden;
+    background:var(--bg);box-shadow:0 20px 80px rgba(0,219,231,.10);max-width:300px}
+  .phone img{display:block;width:100%}
+  .section{padding:56px 0}
+  .section h2{font-family:Sora;font-weight:600;font-size:32px;letter-spacing:-.01em;margin-bottom:8px}
+  .section .lead{color:var(--muted);margin-bottom:32px;max-width:60ch}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .card{background:var(--glass);backdrop-filter:blur(20px);border:1px solid var(--stroke);
+    border-radius:24px;padding:24px}
+  .card h3{font-family:Sora;font-size:18px;margin-bottom:8px}
+  .card p{color:var(--muted);font-size:15px}
+  .shots{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+  .shots figure{border:1px solid var(--stroke);border-radius:20px;overflow:hidden;background:var(--bg)}
+  .shots img{display:block;width:100%}
+  .shots figcaption{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);padding:10px 14px;text-align:center}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  td,th{text-align:left;padding:12px 8px;border-bottom:1px solid var(--stroke);font-size:15px}
+  th{color:var(--cyan);font-family:'JetBrains Mono';font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+  .data{font-family:'JetBrains Mono'}
+  footer{padding:48px 0;color:var(--muted);font-size:14px;border-top:1px solid var(--stroke);margin-top:32px}
+  @media(max-width:820px){.hero{grid-template-columns:1fr;text-align:center}.sub{margin:0 auto}
+    h1{font-size:40px}.grid,.shots{grid-template-columns:1fr 1fr}.nav-links{display:none}.cta{justify-content:center}}
+  @media(max-width:520px){.grid,.shots{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="wrap">
+  <header>
+    <nav>
+      <div class="brand">SkyPulse</div>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#data">Open data</a>
+        <a href="https://github.com/chartmann1590/skypulse-android">GitHub</a>
+      </div>
+    </nav>
+
+    <section class="hero">
+      <div>
+        <span class="pill"><span class="dot"></span> Open ADS-B data · No API key</span>
+        <h1>Live aircraft <span class="accent">around you</span>.</h1>
+        <p class="sub">A native Android tracker built with Kotlin &amp; Jetpack Compose.
+          Map-first, privacy-first, and powered entirely by free, open data — no login,
+          no paid APIs.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://github.com/chartmann1590/skypulse-android">View on GitHub →</a>
+          <a class="btn btn-ghost" href="#data">How the data works</a>
+        </div>
+      </div>
+      <div class="phone"><img src="img/home.png" alt="SkyPulse live map screen" /></div>
+    </section>
+  </header>
+
+  <main>
+    <section class="section" id="features">
+      <h2>Built for enthusiasts</h2>
+      <p class="lead">Everything you need to watch the skies, with honest handling of what
+        free ADS-B data can and can't do.</p>
+      <div class="grid">
+        <div class="card"><h3>Live map</h3><p>OpenStreetMap tiles with aircraft markers rotated to heading. Tap any plane for a cockpit-style detail sheet.</p></div>
+        <div class="card"><h3>Nearby &amp; sorting</h3><p>See aircraft around you sorted by closest, highest, fastest, or most recently seen.</p></div>
+        <div class="card"><h3>Airport lookup</h3><p>Search the full OpenFlights database by name, city, country, IATA or ICAO — plus airports near you.</p></div>
+        <div class="card"><h3>Local alerts</h3><p>On-device notifications when aircraft enter your area, a callsign appears, or a flight is low nearby. No backend.</p></div>
+        <div class="card"><h3>Offline-aware</h3><p>Cached snapshots and clear loading / empty / error / offline states keep things resilient.</p></div>
+        <div class="card"><h3>Privacy-first</h3><p>No account. Saved items and alerts stay on your device. Location is used only on-device.</p></div>
+      </div>
+    </section>
+
+    <section class="section" id="screens">
+      <h2>Screens</h2>
+      <p class="lead">Futuristic glassmorphism — a cockpit HUD that's still easy to read.</p>
+      <div class="shots">
+        <figure><img src="img/detail.png" alt="Aircraft detail"><figcaption>AIRCRAFT DETAIL</figcaption></figure>
+        <figure><img src="img/nearby.png" alt="Nearby aircraft"><figcaption>NEARBY</figcaption></figure>
+        <figure><img src="img/airports.png" alt="Airport lookup"><figcaption>AIRPORTS</figcaption></figure>
+        <figure><img src="img/alerts.png" alt="Flight alerts"><figcaption>ALERTS</figcaption></figure>
+        <figure><img src="img/settings.png" alt="Settings"><figcaption>SETTINGS</figcaption></figure>
+        <figure><img src="img/home.png" alt="Live map"><figcaption>LIVE MAP</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="section" id="data">
+      <h2>100% free, open data</h2>
+      <p class="lead">No FlightAware, FlightRadar24, AviationStack, RapidAPI, or paid Google
+        Maps. No key, no login.</p>
+      <table>
+        <tr><th>Layer</th><th>Source</th><th>Notes</th></tr>
+        <tr><td>Primary aircraft</td><td class="data">ADSB.lol</td><td>Radius search around you</td></tr>
+        <tr><td>Fallback aircraft</td><td class="data">OpenSky (anonymous)</td><td>Rate-limited → cached &amp; throttled</td></tr>
+        <tr><td>Airports / airlines</td><td class="data">OpenFlights</td><td>Bundled, imported into Room</td></tr>
+        <tr><td>Map tiles</td><td class="data">OpenStreetMap</td><td>via osmdroid</td></tr>
+      </table>
+      <p class="lead" style="margin-top:24px">Free ADS-B is best-effort: not every aircraft
+        is guaranteed, coverage varies by area and time, data can be delayed, and some
+        military/private aircraft may be hidden. Route/gate/boarding status isn't available
+        on free feeds — SkyPulse says so plainly.</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap" style="padding:0">
+      <strong style="color:var(--on)">SkyPulse</strong> · Kotlin · Jetpack Compose · Material 3 ·
+      built with free open data. Aircraft © ADSB.lol &amp; OpenSky · airports © OpenFlights ·
+      tiles © OpenStreetMap contributors.
+    </div>
+  </footer>
+</div>
+</body>
+</html>

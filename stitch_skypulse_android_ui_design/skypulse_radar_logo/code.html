@@ -1,0 +1,16 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#00F2FF;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#00F2FF;stop-opacity:0" />
+    </radialGradient>
+  </defs>
+  <circle cx="50%" cy="50%" r="48" fill="none" stroke="#00F2FF" stroke-width="0.5" opacity="0.3" />
+  <circle cx="50%" cy="50%" r="35" fill="none" stroke="#00F2FF" stroke-width="0.5" opacity="0.5" />
+  <circle cx="50%" cy="50%" r="20" fill="none" stroke="#00F2FF" stroke-width="0.5" opacity="0.7" />
+  <circle cx="50%" cy="50%" r="48" fill="url(#glow)" />
+  <path d="M50 35 L53 45 L63 45 L55 52 L58 62 L50 55 L42 62 L45 52 L37 45 L47 45 Z" fill="#00F2FF">
+    <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="4s" repeatCount="indefinite" />
+  </path>
+  <path d="M50 20 L55 45 L50 50 L45 45 Z" fill="#FFFFFF" transform="rotate(45 50 50)" />
+</svg>

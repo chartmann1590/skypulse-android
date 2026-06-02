@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Aircraft Detail</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+    </style>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#002ccd",
+                        "on-tertiary-fixed": "#221b00",
+                        "on-secondary": "#001d93",
+                        "surface-dim": "#0e131e",
+                        "surface-container-highest": "#303541",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#1b1f2b",
+                        "text-high": "#FFFFFF",
+                        "on-secondary-container": "#b1bbff",
+                        "primary-fixed-dim": "#00dbe7",
+                        "primary-container": "#00f2ff",
+                        "on-primary-fixed": "#002022",
+                        "alert-red": "#FF3D00",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#554500",
+                        "surface-container-high": "#252a36",
+                        "error": "#ffb4ab",
+                        "background": "#0e131e",
+                        "secondary": "#bbc3ff",
+                        "surface-container-low": "#171b27",
+                        "primary": "#e1fdff",
+                        "surface-variant": "#303541",
+                        "tertiary": "#fff6e4",
+                        "tertiary-fixed": "#ffe173",
+                        "on-tertiary": "#3b2f00",
+                        "on-primary": "#00363a",
+                        "on-surface-variant": "#b9cacb",
+                        "glass-surface": "rgba(20, 66, 114, 0.15)",
+                        "text-med": "#BFBFBF",
+                        "on-surface": "#dee2f2",
+                        "surface-bright": "#343946",
+                        "surface": "#0e131e",
+                        "outline": "#849495",
+                        "glass-stroke": "rgba(255, 255, 255, 0.1)",
+                        "on-background": "#dee2f2",
+                        "surface-tint": "#00dbe7",
+                        "on-primary-fixed-variant": "#004f54",
+                        "outline-variant": "#3a494b",
+                        "surface-container-lowest": "#090e19",
+                        "inverse-surface": "#dee2f2",
+                        "inverse-primary": "#00696f",
+                        "inverse-on-surface": "#2b303c",
+                        "on-secondary-fixed": "#000f5d",
+                        "tertiary-container": "#fed83a",
+                        "on-tertiary-container": "#725e00",
+                        "tertiary-fixed-dim": "#e8c423",
+                        "on-primary-container": "#006a71",
+                        "primary-fixed": "#74f5ff",
+                        "pitch-black": "#05070A",
+                        "secondary-fixed": "#dee0ff",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "secondary-container": "#0231de",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "card-padding": "20px",
+                        "base": "8px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-lg": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Sora"],
+                        "display-lg": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-lg": ["18px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-pitch-black text-on-background min-h-screen relative overflow-hidden font-body-md text-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- Background Canvas (Dimmed Map) -->
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-pitch-black z-10 opacity-60 mix-blend-multiply"></div>
+<img alt="Map Background" class="w-full h-full object-cover filter brightness-50 contrast-125 grayscale" data-alt="A highly detailed, top-down satellite view of a sprawling metropolis at night, illuminated by intricate networks of glowing yellow and orange streetlights. The scene is rendered in a dark, moody futuristic aesthetic with deep blacks dominating the unlit areas, creating a stark high-contrast canvas. The perspective implies an aerial view from a high-altitude aircraft or satellite, fitting perfectly within a premium, high-tech aviation tracking interface. The overall mood is mysterious yet precise, utilizing a palette of deep space navy and bright amber light vectors." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8UCJhMAmLEVlSKV18PxZtv4PomLLNtPqXuTXxnrwpIKkJBOtB6gvBxqxH9XdNvZN_ou9HpQTdX2JLPKiuyOL0xGyARDoECsmeQo2auUVh3Jccq2SsKvUywNiNEghc5MM9ZWE0ym3eeNeqvtIzvU4HyiMk6eW6YmD9K2qjtkIdRJccjv-eQk_y1dAjhEaZSg2rMryOfsGZIWR2E-7EVwKtoKQBmFevl38nOGOLLJUv59woBGjAOACRnV-Z6rv2HxVnTHHSodeTbHcH"/>
+</div>
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-glass-surface backdrop-blur-xl text-primary font-headline-lg-mobile text-headline-lg-mobile border-b border-glass-stroke shadow-none">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary/10 transition-colors active:scale-95 transition-transform rounded-full">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<span class="font-display-lg text-headline-lg text-primary tracking-tight">SkyPulse</span>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-primary/10 transition-colors active:scale-95 transition-transform rounded-full overflow-hidden border border-glass-stroke">
+<img alt="User" class="w-full h-full object-cover" data-alt="A close-up profile portrait of a confident pilot looking towards the horizon, bathed in cinematic, high-contrast lighting that highlights facial features against a dark background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSOysZdpLM1jE4yl4tiigi3kaYVUUCO426QxPQsRtQWF2MjR1x80Hy0Z1_foSgImcwPcGuPhT9q7RPlRueTq88nRjec6Rjn5hgTaplQ8VPyPyE3PBN0zJ16-gVWTeJZEHuF-X2rOyo0Y6Z7zpx7DGWb8UPWQt8yvVumquGo62x-JooCjwL_ciJ_9xpgnO4kbaGXODTcRnfzu7FjEd6avWRjbeOg5GRNo6g8Vn80r-dULChrfHgaJQtIEECEMTd_tqKG2X28YHbSDrI"/>
+</button>
+</header>
+<!-- Main Content Area (Behind Nav Shells) -->
+<main class="relative z-10 pt-20 pb-32 h-screen flex flex-col justify-end px-margin-mobile md:px-margin-desktop">
+<!-- Target Reticle (Decorative, indicating selected aircraft on map) -->
+<div class="absolute top-[30%] left-[50%] transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 flex items-center justify-center animate-pulse">
+<div class="absolute w-full h-full border border-primary rounded-full opacity-50"></div>
+<div class="absolute w-2 h-2 bg-primary rounded-full shadow-[0_0_12px_rgba(225,253,255,1)]"></div>
+<span class="material-symbols-outlined text-primary text-3xl absolute -top-8 rotate-45" style="text-shadow: 0 0 8px rgba(0,219,231,0.8);">flight</span>
+</div>
+<!-- Bottom Sheet (Aircraft Detail) -->
+<section class="w-full max-w-2xl mx-auto bg-glass-surface backdrop-blur-[20px] border border-glass-stroke rounded-[32px] p-card-padding flex flex-col gap-6 shadow-2xl relative mb-4">
+<!-- Drag Handle -->
+<div class="w-12 h-1.5 bg-outline-variant rounded-full mx-auto -mt-2"></div>
+<!-- Header -->
+<div class="flex flex-col gap-1 border-b border-glass-stroke pb-4">
+<div class="flex justify-between items-start">
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-text-high tracking-tight">UAL1024</h1>
+<span class="px-3 py-1 bg-surface-container-high border border-glass-stroke rounded-full font-label-sm text-label-sm text-primary flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                        LIVE
+                    </span>
+</div>
+<div class="flex items-center gap-3 font-label-sm text-label-sm text-text-med">
+<span class="font-data-lg text-data-lg text-on-surface-variant opacity-80 text-[14px]">ICAO: A0E124</span>
+<span class="w-1 h-1 bg-outline-variant rounded-full"></span>
+<div class="flex items-center gap-1.5">
+<img alt="USA Flag" class="w-4 h-auto rounded-[2px] opacity-80" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCY2QTmDJe6yHJ4_fV70uhccB8oGIyW0Z4pfbABiRiCewu1UlqUgOGZlW8vZWz_Z3o037osIvLZTUqYdqJgDQB95v8gp1CuWxzYXXJWUQ4v6k5Qf3eDaoklKdc2mUg2nzhu6Q1z6FXUS1XsnLQg8BaHTR8qGTUAeRlK3oDp95kVgup4_2nrv5Xf1XL5c0I4nB30QmL2fREh5OxrrDlIwRa0_NOcaVJ7r1mpBDumzKb3xEM4mq1TVaAXfRnVacXSNrzoZ-dL4UNRb7GB"/>
+<span>United States</span>
+</div>
+</div>
+</div>
+<!-- Cockpit Grid (Data) -->
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+<!-- Altitude -->
+<div class="bg-surface-container-low/50 backdrop-blur-sm border border-glass-stroke rounded-xl p-3 flex flex-col gap-1 transition-all hover:bg-surface-container-high/50 group">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">height</span> Altitude
+                    </span>
+<span class="font-data-lg text-data-lg text-primary group-hover:text-primary-fixed drop-shadow-[0_0_8px_rgba(225,253,255,0.2)]">34,000 <span class="text-xs text-outline font-body-md">ft</span></span>
+</div>
+<!-- Speed -->
+<div class="bg-surface-container-low/50 backdrop-blur-sm border border-glass-stroke rounded-xl p-3 flex flex-col gap-1 transition-all hover:bg-surface-container-high/50 group">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">speed</span> Speed
+                    </span>
+<span class="font-data-lg text-data-lg text-primary group-hover:text-primary-fixed drop-shadow-[0_0_8px_rgba(225,253,255,0.2)]">480 <span class="text-xs text-outline font-body-md">kts</span></span>
+</div>
+<!-- Heading -->
+<div class="bg-surface-container-low/50 backdrop-blur-sm border border-glass-stroke rounded-xl p-3 flex flex-col gap-1 transition-all hover:bg-surface-container-high/50 group">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">explore</span> Heading
+                    </span>
+<div class="flex items-center gap-2">
+<span class="font-data-lg text-data-lg text-primary group-hover:text-primary-fixed drop-shadow-[0_0_8px_rgba(225,253,255,0.2)]">285° <span class="text-xs text-outline font-body-md">NW</span></span>
+<span class="material-symbols-outlined text-outline text-[16px] -rotate-45">navigation</span>
+</div>
+</div>
+<!-- Vertical Rate -->
+<div class="bg-surface-container-low/50 backdrop-blur-sm border border-glass-stroke rounded-xl p-3 flex flex-col gap-1 transition-all hover:bg-surface-container-high/50 group">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">swap_vert</span> Vert. Rate
+                    </span>
+<span class="font-data-lg text-data-lg text-primary group-hover:text-primary-fixed drop-shadow-[0_0_8px_rgba(225,253,255,0.2)]">+500 <span class="text-xs text-outline font-body-md">fpm</span></span>
+</div>
+<!-- Last Seen -->
+<div class="bg-surface-container-low/50 backdrop-blur-sm border border-glass-stroke rounded-xl p-3 flex flex-col gap-1 transition-all hover:bg-surface-container-high/50 group col-span-2 md:col-span-1">
+<span class="font-label-sm text-label-sm text-outline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">radar</span> Last Seen
+                    </span>
+<span class="font-data-lg text-data-lg text-on-surface-variant group-hover:text-text-high">Just now</span>
+</div>
+</div>
+<!-- Route Preview -->
+<div class="relative h-24 rounded-xl border border-glass-stroke overflow-hidden bg-surface-container-lowest flex items-center px-4">
+<!-- Mini-map background -->
+<div class="absolute inset-0 opacity-20 bg-cover bg-center" data-alt="A high-altitude, abstract view of Earth from space at night, showcasing interconnected glowing light nodes representing major cities. The aesthetic is dark, high-tech, and futuristic, aligning with an advanced avionics HUD visualization. The color palette emphasizes deep atmospheric blues, stark black space, and brilliant cyan light networks." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDOMT2efz3QSvP0psaWyVbTeeCWQYbNWJcBZmvLNP_a6obknIxed-ukoUxqnVk76pw9DLdoOl3ZYBCh1SH6VHVPPeFNNGu5K6jn5HmT95VgmYDjU6_fRzFJ1T2QBruGURyATHfwZPqlTU2ISL3IHO4xRnB2uKzKr22oZIW-qP64rr5Lx42MHYXH02WZlxrti0Y7W561K7dNYweyMm-pKT_SUYhj6GF9-QTw6AhnpLNuG-OPhhn7dVOvxmYwHuuA7MDYo7IH48wzhLoW');"></div>
+<!-- Overlay gradient -->
+<div class="absolute inset-0 bg-gradient-to-r from-surface-container-lowest via-transparent to-surface-container-lowest"></div>
+<div class="relative z-10 w-full flex items-center justify-between">
+<div class="flex flex-col items-center">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-text-high">SFO</span>
+<span class="font-label-sm text-label-sm text-outline mt-1">San Francisco</span>
+</div>
+<div class="flex-1 px-4 flex items-center relative">
+<div class="w-full h-[2px] bg-glass-stroke relative">
+<!-- Animated path progress -->
+<div class="absolute top-0 left-0 h-full bg-primary shadow-[0_0_10px_rgba(225,253,255,0.8)] w-[40%] rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-primary absolute left-[40%] -translate-x-1/2 -mt-1 drop-shadow-[0_0_8px_rgba(225,253,255,1)] text-[20px] rotate-90">flight</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-text-high">ORD</span>
+<span class="font-label-sm text-label-sm text-outline mt-1">Chicago</span>
+</div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="flex items-center gap-3 mt-2">
+<button class="flex-1 py-3 px-4 rounded-full border border-glass-stroke bg-surface-container-low hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2 text-on-surface hover:text-primary group">
+<span class="material-symbols-outlined group-hover:fill text-[20px]">star</span>
+<span class="font-title-md text-title-md text-[14px]">Save</span>
+</button>
+<button class="flex-1 py-3 px-4 rounded-full border border-glass-stroke bg-surface-container-low hover:bg-surface-container-high transition-colors flex items-center justify-center gap-2 text-on-surface hover:text-primary group">
+<span class="material-symbols-outlined text-[20px]">share</span>
+<span class="font-title-md text-title-md text-[14px]">Share</span>
+</button>
+<button class="flex-1 py-3 px-4 rounded-full bg-primary text-pitch-black hover:bg-primary-fixed transition-colors flex items-center justify-center gap-2 shadow-[0_4px_20px_rgba(225,253,255,0.15)] group active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+<span class="font-title-md text-title-md text-[14px]">Notify</span>
+</button>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-glass-surface backdrop-blur-xl border-t border-glass-stroke rounded-t-xl font-label-sm text-label-sm shadow-none">
+<!-- Active Tab: Map -->
+<button class="flex flex-col items-center justify-center text-primary filter drop-shadow-[0_0_8px_rgba(0,219,231,0.5)] active:scale-90 duration-200 group">
+<span class="material-symbols-outlined fill group-hover:text-primary/80 transition-all text-2xl mb-1">map</span>
+<span>Map</span>
+</button>
+<!-- Inactive Tabs -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 group">
+<span class="material-symbols-outlined group-hover:text-primary/80 transition-all text-2xl mb-1">explore</span>
+<span>Nearby</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 group">
+<span class="material-symbols-outlined group-hover:text-primary/80 transition-all text-2xl mb-1">local_airport</span>
+<span>Airports</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 group">
+<span class="material-symbols-outlined group-hover:text-primary/80 transition-all text-2xl mb-1">notifications</span>
+<span>Alerts</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 group">
+<span class="material-symbols-outlined group-hover:text-primary/80 transition-all text-2xl mb-1">bookmark</span>
+<span>Saved</span>
+</button>
+</nav>
+</body></html>

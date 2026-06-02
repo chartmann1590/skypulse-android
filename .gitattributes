@@ -1,0 +1,13 @@
+# Normalize line endings; keep gradlew LF so Linux CI can execute it.
+* text=auto eol=lf
+*.bat text eol=crlf
+gradlew text eol=lf
+
+# Binary assets — never normalize.
+*.dat binary
+*.ttf binary
+*.png binary
+*.jpg binary
+*.jar binary
+*.apk binary
+*.keystore binary

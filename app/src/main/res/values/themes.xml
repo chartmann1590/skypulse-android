@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose draws the UI; this XML theme only configures the window chrome. -->
+    <style name="Theme.SkyPulse" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/pitch_black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+</resources>

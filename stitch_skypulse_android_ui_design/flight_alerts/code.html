@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Flight Alerts - SkyPulse</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Sora:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#002ccd",
+                        "on-tertiary-fixed": "#221b00",
+                        "on-secondary": "#001d93",
+                        "surface-dim": "#0e131e",
+                        "surface-container-highest": "#303541",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#1b1f2b",
+                        "text-high": "#FFFFFF",
+                        "on-secondary-container": "#b1bbff",
+                        "primary-fixed-dim": "#00dbe7",
+                        "primary-container": "#00f2ff",
+                        "on-primary-fixed": "#002022",
+                        "alert-red": "#FF3D00",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#554500",
+                        "surface-container-high": "#252a36",
+                        "error": "#ffb4ab",
+                        "background": "#0e131e",
+                        "secondary": "#bbc3ff",
+                        "surface-container-low": "#171b27",
+                        "primary": "#e1fdff",
+                        "surface-variant": "#303541",
+                        "tertiary": "#fff6e4",
+                        "tertiary-fixed": "#ffe173",
+                        "on-tertiary": "#3b2f00",
+                        "on-primary": "#00363a",
+                        "on-surface-variant": "#b9cacb",
+                        "glass-surface": "rgba(20, 66, 114, 0.15)",
+                        "text-med": "#BFBFBF",
+                        "on-surface": "#dee2f2",
+                        "surface-bright": "#343946",
+                        "surface": "#0e131e",
+                        "outline": "#849495",
+                        "glass-stroke": "rgba(255, 255, 255, 0.1)",
+                        "on-background": "#dee2f2",
+                        "surface-tint": "#00dbe7",
+                        "on-primary-fixed-variant": "#004f54",
+                        "outline-variant": "#3a494b",
+                        "surface-container-lowest": "#090e19",
+                        "inverse-surface": "#dee2f2",
+                        "inverse-primary": "#00696f",
+                        "inverse-on-surface": "#2b303c",
+                        "on-secondary-fixed": "#000f5d",
+                        "tertiary-container": "#fed83a",
+                        "on-tertiary-container": "#725e00",
+                        "tertiary-fixed-dim": "#e8c423",
+                        "on-primary-container": "#006a71",
+                        "primary-fixed": "#74f5ff",
+                        "pitch-black": "#05070A",
+                        "secondary-fixed": "#dee0ff",
+                        "secondary-fixed-dim": "#bbc3ff",
+                        "secondary-container": "#0231de",
+                        "on-error": "#690005"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "card-padding": "20px",
+                        "base": "8px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "title-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-lg": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Sora"],
+                        "display-lg": ["Sora"],
+                        "headline-lg": ["Sora"],
+                        "label-sm": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "title-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "data-lg": ["18px", { "lineHeight": "24px", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #05070A;
+            color: #dee2f2;
+            background-image: radial-gradient(circle at 50% -20%, rgba(0, 219, 231, 0.15) 0%, rgba(5, 7, 10, 1) 60%);
+            background-attachment: fixed;
+        }
+        
+        /* Custom Switch Styles for Glassmorphism */
+        .glass-switch {
+            appearance: none;
+            width: 48px;
+            height: 24px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            position: relative;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background-color: #dee2f2;
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .glass-switch:checked {
+            background-color: rgba(0, 219, 231, 0.2);
+            border-color: #00dbe7;
+            box-shadow: 0 0 12px rgba(0, 219, 231, 0.3) inset;
+        }
+        
+        .glass-switch:checked::after {
+            left: 26px;
+            background-color: #00f2ff;
+            box-shadow: 0 0 8px rgba(0, 242, 255, 0.8);
+        }
+
+        /* Custom Range Slider */
+        .glass-range {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            outline: none;
+        }
+        
+        .glass-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00f2ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 242, 255, 0.5);
+            transition: transform 0.1s;
+        }
+        
+        .glass-range::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Custom Input */
+        .glass-input {
+            background: rgba(20, 66, 114, 0.1);
+            border: none;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            color: #FFFFFF;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-input:focus {
+            outline: none;
+            border-bottom-color: #00f2ff;
+            background: rgba(0, 219, 231, 0.05);
+            box-shadow: 0 4px 12px rgba(0, 219, 231, 0.1);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen flex flex-col pt-20 pb-24 font-body-md text-body-md">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile h-16 bg-glass-surface backdrop-blur-xl border-b border-glass-stroke">
+<div class="flex items-center gap-4">
+<button aria-label="Menu" class="text-primary hover:bg-primary/10 transition-colors rounded-full p-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary tracking-tight">SkyPulse</h1>
+</div>
+<div class="flex items-center">
+<button aria-label="User profile picture" class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-glass-stroke hover:bg-primary/10 transition-colors active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary text-xl mt-1" style="font-variation-settings: 'FILL' 1;">person</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 px-margin-mobile md:px-margin-desktop max-w-3xl mx-auto w-full flex flex-col gap-6">
+<section class="mt-4">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-text-high mb-2">Flight Alerts</h2>
+<p class="text-on-surface-variant font-body-md text-body-md">Create local alerts based on live ADS-B data. No account required.</p>
+</section>
+<!-- Alerts Configuration List -->
+<div class="flex flex-col gap-4">
+<!-- Alert 1: Radius -->
+<div class="bg-glass-surface backdrop-blur-xl border border-glass-stroke rounded-xl p-card-padding">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">radar</span>
+<h3 class="font-title-md text-title-md text-text-high">Aircraft enters my area</h3>
+</div>
+<input aria-label="Toggle Area Alert" checked="" class="glass-switch" type="checkbox"/>
+</div>
+<div class="pl-9 pr-2">
+<div class="flex justify-between items-end mb-2">
+<label class="text-on-surface-variant text-sm">Radius</label>
+<span class="font-data-lg text-data-lg text-primary" id="radius-value">15 NM</span>
+</div>
+<input aria-label="Adjust Radius" class="glass-range w-full" id="radius-slider" max="50" min="5" type="range" value="15"/>
+<div class="flex justify-between text-xs text-on-surface-variant mt-2 opacity-50">
+<span>5 NM</span>
+<span>50 NM</span>
+</div>
+</div>
+</div>
+<!-- Alert 2: Callsign -->
+<div class="bg-glass-surface backdrop-blur-xl border border-glass-stroke rounded-xl p-card-padding">
+<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">flight</span>
+<h3 class="font-title-md text-title-md text-text-high">Specific callsign appears</h3>
+</div>
+<input aria-label="Toggle Callsign Alert" class="glass-switch" type="checkbox"/>
+</div>
+<div class="pl-9">
+<input aria-label="Enter Callsign" class="glass-input w-full p-2 rounded-t-md font-data-lg text-data-lg uppercase tracking-wider" placeholder="e.g., N12345 or UAL123" type="text"/>
+</div>
+</div>
+<!-- Alert 3: Altitude -->
+<div class="bg-glass-surface backdrop-blur-xl border border-glass-stroke rounded-xl p-card-padding">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">vertical_align_bottom</span>
+<div>
+<h3 class="font-title-md text-title-md text-text-high">Low altitude flight nearby</h3>
+<p class="text-on-surface-variant text-sm mt-1">Below 5,000 ft</p>
+</div>
+</div>
+<input aria-label="Toggle Low Altitude Alert" checked="" class="glass-switch" type="checkbox"/>
+</div>
+</div>
+<!-- Alert 4: Airport -->
+<div class="bg-glass-surface backdrop-blur-xl border border-glass-stroke rounded-xl p-card-padding">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">local_airport</span>
+<h3 class="font-title-md text-title-md text-text-high">Airport activity nearby</h3>
+</div>
+<input aria-label="Toggle Airport Activity Alert" class="glass-switch" type="checkbox"/>
+</div>
+</div>
+</div>
+<div class="mt-8 text-center">
+<button class="bg-primary text-pitch-black font-title-md text-title-md py-3 px-8 rounded-full hover:shadow-[0_0_15px_rgba(0,242,255,0.4)] transition-all active:scale-95">
+                Save Preferences
+            </button>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-glass-surface backdrop-blur-xl border-t border-glass-stroke rounded-t-xl md:hidden">
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">map</span>
+<span class="font-label-sm text-label-sm">Map</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">explore</span>
+<span class="font-label-sm text-label-sm">Nearby</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">local_airport</span>
+<span class="font-label-sm text-label-sm">Airports</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary filter drop-shadow-[0_0_8px_rgba(0,219,231,0.5)] hover:text-primary/80 transition-all active:scale-90 duration-200 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">notifications</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary/80 transition-all active:scale-90 duration-200 w-16">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 0;">bookmark</span>
+<span class="font-label-sm text-label-sm">Saved</span>
+</button>
+</nav>
+<script>
+        // Simple JS for range slider visual update
+        const slider = document.getElementById('radius-slider');
+        const output = document.getElementById('radius-value');
+        
+        if(slider && output) {
+            slider.addEventListener('input', function() {
+                output.textContent = this.value + ' NM';
+            });
+        }
+    </script>
+</body></html>

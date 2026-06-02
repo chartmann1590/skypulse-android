@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="36dp"
+    android:height="36dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Plane pointing straight up (north) so osmdroid rotation == heading degrees. -->
+    <path
+        android:fillColor="#FF00DBE7"
+        android:pathData="M12,2L13.5,9.5 21,13.5v2l-7.5,-2.2V18l2.5,1.8v1.5L12,20.4 8,21.3v-1.5L10.5,18v-4.7L3,15.5v-2L10.5,9.5z" />
+</vector>

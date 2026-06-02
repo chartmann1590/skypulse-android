@@ -1,0 +1,249 @@
+Build a complete native Android app called “SkyPulse” using Kotlin and Jetpack Compose.
+
+Use the Stitch-generated UI/layout as the design reference. Recreate the screens, structure, spacing, colors, typography, and navigation as closely as possible.
+
+App concept:
+SkyPulse is a live aircraft tracking Android app. It uses only completely free open online data sources and must not require any paid API key, account login, or secret token.
+
+Important rule:
+Do NOT use FlightAware, FlightRadar24, AviationStack, Aviation Edge, RapidAPI, Google Maps paid APIs, or any paid/key-required aviation API. Do not scrape websites that block scraping or require login.
+
+Primary live aircraft data:
+Use ADSB.lol public API as the primary source.
+Base docs/source:
+- https://www.adsb.lol/
+- https://api.adsb.lol/
+- https://www.adsb.lol/docs/open-data/api/
+
+Fallback live aircraft data:
+Use OpenSky Network anonymous public REST access as fallback.
+Base docs/source:
+- https://opensky-network.org/
+- https://openskynetwork.github.io/opensky-api/rest.html
+- Anonymous access is allowed but rate-limited, so the app must cache and throttle requests.
+
+Offline/local reference data:
+Bundle OpenFlights airport and airline data as app assets.
+Use it for airport search, airport names, IATA/ICAO lookup, city/country display, and airline name lookup where possible.
+Source:
+- https://openflights.org/data.php
+
+Tech stack:
+- Kotlin
+- Jetpack Compose
+- Material 3
+- MVVM architecture
+- Kotlin Coroutines
+- Retrofit or Ktor client
+- kotlinx.serialization or Moshi
+- Room database for saved aircraft, saved airports, saved alert areas, and cached aircraft snapshots
+- DataStore for settings
+- OSMDroid or MapLibre/OpenStreetMap-based map tiles, not Google Maps paid API
+- Local notifications for alerts
+- Location permission support
+- Minimum SDK: 26
+- Target latest stable Android SDK
+
+Core features to implement:
+
+1. App navigation
+Create these screens:
+- SplashScreen
+- OnboardingScreen
+- HomeMapScreen
+- AircraftDetailBottomSheet
+- NearbyAircraftScreen
+- AirportLookupScreen
+- AlertsScreen
+- SavedScreen
+- SettingsScreen
+
+2. HomeMapScreen
+- Full-screen OpenStreetMap-based map
+- Show aircraft markers from live ADS-B data
+- Aircraft marker rotates based on heading
+- Floating top search bar
+- Floating location button
+- Floating filter button
+- Bottom glass-style summary card
+- Bottom navigation bar
+- Tapping aircraft opens AircraftDetailBottomSheet
+
+3. Live aircraft fetching
+Implement a repository called AircraftRepository.
+
+It should:
+- Fetch aircraft by bounding box around user location
+- Use ADSB.lol first
+- Fall back to OpenSky if ADSB.lol fails
+- Cache results for at least 15–30 seconds
+- Never spam requests
+- Handle no internet gracefully
+- Handle malformed/missing data gracefully
+- Show last updated time
+- Expose data using StateFlow
+
+Create normalized data model:
+
+data class Aircraft(
+    val id: String,
+    val callsign: String?,
+    val hex: String?,
+    val latitude: Double?,
+    val longitude: Double?,
+    val altitudeFeet: Double?,
+    val speedKnots: Double?,
+    val headingDegrees: Double?,
+    val verticalRate: Double?,
+    val originCountry: String?,
+    val lastSeenEpochSeconds: Long?,
+    val source: DataSource
+)
+
+enum class DataSource {
+    ADSB_LOL,
+    OPENSKY,
+    CACHE
+}
+
+4. OpenSky fallback
+Implement OpenSky state vector parsing.
+Map OpenSky fields into the normalized Aircraft model.
+Respect anonymous access limits by throttling and caching.
+Do not require credentials.
+
+5. ADSB.lol integration
+Implement ADSB.lol requests for aircraft around a bounding box or area if supported by the public API.
+Parse returned aircraft into the normalized Aircraft model.
+The app should be written so the ADSB.lol endpoint paths are centralized in one file, making it easy to adjust if the API changes.
+
+6. Airport lookup
+Bundle OpenFlights airports.dat and airlines.dat in assets.
+On first launch, import them into Room.
+Create:
+- Airport entity
+- Airline entity
+- Airport search DAO
+- Search by airport name, city, country, IATA, ICAO
+- “Airports near me” using lat/lon distance calculation
+- Airport detail card with button to view aircraft near that airport
+
+7. Nearby screen
+Show aircraft near the user.
+Calculate approximate distance from user using Haversine formula.
+Sort by:
+- Closest
+- Highest
+- Fastest
+- Recently seen
+
+8. Alerts
+Create local-only alerts:
+- Aircraft enters selected radius
+- Specific callsign appears
+- Aircraft below altitude nearby
+- Aircraft near saved airport
+Use WorkManager or foreground-safe periodic checks where appropriate.
+Do not over-poll. Use sensible refresh intervals.
+Show Android local notifications.
+Store alert rules in Room.
+No server backend required.
+
+9. Saved screen
+Allow saving:
+- Aircraft by ICAO hex/callsign
+- Airports
+- Search areas
+Persist with Room.
+
+10. Settings
+Settings with DataStore:
+- Refresh interval
+- Distance units
+- Altitude units
+- Speed units
+- Enable/disable background alerts
+- Data source status
+- Clear cache
+- About open data
+
+11. Privacy
+The app should not require account login.
+Saved items and alert rules stay local on the phone.
+Location is only used for nearby aircraft and alerts.
+Add a simple privacy text screen.
+
+12. Monetization-ready but do not implement billing yet
+Structure the app so future in-app purchases can unlock:
+- Premium themes
+- More saved alerts
+- Custom alert sounds
+- Extra map styles
+But do not implement Google Play Billing yet.
+Just add clean TODO interfaces/classes:
+- EntitlementRepository
+- FreeEntitlementRepository
+
+13. UI implementation
+Use Compose components matching Stitch:
+- Dark aviation theme
+- Glass cards
+- Rounded corners
+- Radar-style accent graphics
+- Map-first home screen
+- Clean data cards
+- Loading states
+- Empty states
+- Error states
+- Offline/cached badge
+
+14. Project output requirements
+Return the full working Android project structure.
+Include:
+- settings.gradle
+- build.gradle root
+- app/build.gradle
+- AndroidManifest.xml
+- all Kotlin files
+- Compose theme files
+- Room database files
+- repository files
+- network models
+- assets import code
+- sample airports asset loader
+- README.md with setup instructions
+
+15. README must explain:
+- No API key required
+- Uses ADSB.lol public open data first
+- Uses OpenSky anonymous data as fallback
+- Uses OpenFlights local database for airports/airlines
+- Limits of free ADS-B data:
+  - not every aircraft is guaranteed
+  - delay/gate/boarding status is not guaranteed
+  - data can be delayed or missing
+  - some military/private aircraft may be hidden or incomplete
+- How to build in Android Studio
+- How to run on a real Android phone
+- Required permissions
+
+16. Quality requirements
+- Full code, not snippets
+- No placeholder TODOs for core app functionality
+- App must compile
+- Use clear package structure:
+  com.skypulse.app
+  com.skypulse.app.data
+  com.skypulse.app.data.local
+  com.skypulse.app.data.remote
+  com.skypulse.app.data.repository
+  com.skypulse.app.domain
+  com.skypulse.app.ui
+  com.skypulse.app.ui.screens
+  com.skypulse.app.ui.components
+  com.skypulse.app.worker
+- Add comments where the public API parsing may need adjustment
+- Make network layer resilient
+- Make the UI work even with mock data if live source fails
+
+Build the app as a real Android app, not a prototype.
