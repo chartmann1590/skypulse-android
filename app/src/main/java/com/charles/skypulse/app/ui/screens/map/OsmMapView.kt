@@ -25,6 +25,7 @@ fun OsmMapView(
     selectedId: String?,
     onAircraftClick: (Aircraft) -> Unit,
     modifier: Modifier = Modifier,
+    recenterTrigger: Int = 0,
 ) {
     val context = LocalContext.current
     val mapView = remember {
@@ -36,14 +37,27 @@ fun OsmMapView(
             isHorizontalMapRepetitionEnabled = false
         }
     }
+    // Mutable holders that don't trigger recomposition.
+    val hasCentered = remember { booleanArrayOf(false) }
+    val lastRecenter = remember { intArrayOf(-1) }
 
     AndroidView(
         factory = { mapView },
         modifier = modifier,
         update = { map ->
-            // Center on user the first time we have a location.
-            if (userLat != null && userLon != null && map.mapCenter.latitude == 0.0) {
+            // Center on the user the first time we get a location.
+            if (userLat != null && userLon != null && !hasCentered[0]) {
+                map.controller.setZoom(9.0)
                 map.controller.setCenter(GeoPoint(userLat, userLon))
+                hasCentered[0] = true
+            }
+            // Re-center (animated) whenever the location button is tapped.
+            if (recenterTrigger != lastRecenter[0]) {
+                lastRecenter[0] = recenterTrigger
+                if (userLat != null && userLon != null) {
+                    map.controller.animateTo(GeoPoint(userLat, userLon))
+                    map.controller.setZoom(10.0)
+                }
             }
 
             map.overlays.clear()

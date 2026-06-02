@@ -49,6 +49,7 @@ fun HomeMapScreen(
     val selected by viewModel.selected.collectAsStateWithLifecycle()
     val selectedRoute by viewModel.selectedRoute.collectAsStateWithLifecycle()
     val selectedProgress by viewModel.selectedProgress.collectAsStateWithLifecycle()
+    val recenterTrigger by viewModel.recenterTrigger.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize().background(SkyColors.PitchBlack)) {
         OsmMapView(
@@ -58,6 +59,7 @@ fun HomeMapScreen(
             selectedId = selected?.id,
             onAircraftClick = viewModel::select,
             modifier = Modifier.fillMaxSize(),
+            recenterTrigger = recenterTrigger,
         )
 
         // Floating search bar (decorative entry — search lives on Airports tab).

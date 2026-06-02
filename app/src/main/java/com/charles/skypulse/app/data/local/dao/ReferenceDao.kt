@@ -25,7 +25,14 @@ interface AirportDao {
            OR iata LIKE :q || '%'
            OR icao LIKE :q || '%'
         ORDER BY
-           CASE WHEN iata = :q OR icao = :q THEN 0 ELSE 1 END,
+           CASE
+             WHEN iata LIKE :q OR icao LIKE :q THEN 0
+             WHEN iata LIKE :q || '%' OR icao LIKE :q || '%' THEN 1
+             WHEN city LIKE :q OR name LIKE :q THEN 2
+             WHEN city LIKE :q || '%' OR name LIKE :q || '%' THEN 3
+             ELSE 4
+           END,
+           (iata IS NULL OR iata = '') ,
            name
         LIMIT :limit
         """,

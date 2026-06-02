@@ -48,6 +48,10 @@ class HomeMapViewModel @Inject constructor(
     private val _userLocation = MutableStateFlow<UserLocation?>(null)
     val userLocation: StateFlow<UserLocation?> = _userLocation.asStateFlow()
 
+    /** Incremented each time the user taps the location button, to drive a map re-center. */
+    private val _recenterTrigger = MutableStateFlow(0)
+    val recenterTrigger: StateFlow<Int> = _recenterTrigger.asStateFlow()
+
     private val _selected = MutableStateFlow<Aircraft?>(null)
     val selected: StateFlow<Aircraft?> = _selected.asStateFlow()
 
@@ -88,6 +92,7 @@ class HomeMapViewModel @Inject constructor(
     fun recenter() {
         viewModelScope.launch {
             val loc = resolveLocation()
+            _recenterTrigger.value += 1 // tell the map to animate to the fresh location
             aircraftRepository.refresh(loc.lat, loc.lon, radiusNm, force = true)
         }
     }

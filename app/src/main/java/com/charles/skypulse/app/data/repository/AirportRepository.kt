@@ -18,8 +18,9 @@ class AirportRepository @Inject constructor(
 ) {
     suspend fun search(query: String): List<Airport> = withContext(Dispatchers.IO) {
         val q = query.trim()
-        if (q.isEmpty()) emptyList()
-        else airportDao.search(q.uppercase().takeIf { q.length <= 4 } ?: q).map { it.toDomain() }
+        // SQLite LIKE is case-insensitive for ASCII, so pass the raw query and let the
+        // DAO's ranking handle exact-code / prefix / contains ordering.
+        if (q.isEmpty()) emptyList() else airportDao.search(q).map { it.toDomain() }
     }
 
     /** Airports near a point, sorted by distance (km), using a bbox prefilter + Haversine. */

@@ -42,6 +42,7 @@ import com.charles.skypulse.app.domain.util.FormatUtils
 import com.charles.skypulse.app.ui.components.AircraftListItem
 import com.charles.skypulse.app.ui.components.EmptyState
 import com.charles.skypulse.app.ui.components.PrimaryButton
+import com.charles.skypulse.app.ui.screens.map.AircraftDetailSheet
 import com.charles.skypulse.app.ui.theme.SkyColors
 import com.charles.skypulse.app.ui.theme.SkyType
 
@@ -52,6 +53,9 @@ fun AirportLookupScreen(viewModel: AirportViewModel = hiltViewModel()) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val focus by viewModel.focusAirport.collectAsStateWithLifecycle()
     val focusAircraft by viewModel.aircraftAtFocus.collectAsStateWithLifecycle()
+    val selected by viewModel.selected.collectAsStateWithLifecycle()
+    val selectedRoute by viewModel.selectedRoute.collectAsStateWithLifecycle()
+    val selectedProgress by viewModel.selectedProgress.collectAsStateWithLifecycle()
 
     var query by remember { mutableStateOf(TextFieldValue("")) }
 
@@ -171,12 +175,24 @@ fun AirportLookupScreen(viewModel: AirportViewModel = hiltViewModel()) {
                             distanceUnit = settings.distanceUnit,
                             altitudeUnit = settings.altitudeUnit,
                             speedUnit = settings.speedUnit,
-                            onClick = {},
+                            onClick = { viewModel.select(ac) },
                         )
                     }
                 }
             }
         }
+    }
+
+    selected?.let { aircraft ->
+        AircraftDetailSheet(
+            aircraft = aircraft,
+            altitudeUnit = settings.altitudeUnit,
+            speedUnit = settings.speedUnit,
+            onDismiss = viewModel::clearSelection,
+            onSave = viewModel::toggleSaveSelected,
+            route = selectedRoute,
+            progress = selectedProgress,
+        )
     }
 }
 
