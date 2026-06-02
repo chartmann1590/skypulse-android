@@ -6,6 +6,12 @@ enum class AlertType {
     SPECIFIC_CALLSIGN,
     LOW_ALTITUDE_NEARBY,
     AIRPORT_ACTIVITY_NEARBY,
+
+    /** A saved flight takes off (transitions on-ground -> airborne). Best-effort. */
+    FLIGHT_DEPARTED,
+
+    /** A saved flight is approaching its destination (near + descending). Best-effort. */
+    FLIGHT_LANDING_SOON,
 }
 
 /**

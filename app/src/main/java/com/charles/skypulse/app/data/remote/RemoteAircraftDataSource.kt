@@ -58,6 +58,24 @@ class RemoteAircraftDataSource @Inject constructor(
         }
     }
 
+    /** Locate one aircraft by ICAO hex (anywhere). Null on failure/not-found. */
+    suspend fun fetchByHex(hex: String): Aircraft? = try {
+        adsbApi.getByHex(hex).ac?.firstNotNullOfOrNull { it.toAircraft() }
+    } catch (ce: CancellationException) {
+        throw ce
+    } catch (t: Throwable) {
+        null
+    }
+
+    /** Locate one aircraft by callsign (anywhere). Null on failure/not-found. */
+    suspend fun fetchByCallsign(callsign: String): Aircraft? = try {
+        adsbApi.getByCallsign(callsign).ac?.firstNotNullOfOrNull { it.toAircraft() }
+    } catch (ce: CancellationException) {
+        throw ce
+    } catch (t: Throwable) {
+        null
+    }
+
     private fun AdsbAircraftDto.toAircraft(): Aircraft? {
         val id = hex?.trim()?.takeIf { it.isNotEmpty() }
             ?: flight?.trim()?.takeIf { it.isNotEmpty() }

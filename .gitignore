@@ -21,3 +21,6 @@ local.properties
 
 # Logs
 *.log
+
+# Local device screenshots used only for manual QA (may contain personal notifications)
+docs/img/device_*.png

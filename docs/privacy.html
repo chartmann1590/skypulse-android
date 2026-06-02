@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SkyPulse — Privacy Policy</title>
+<meta name="description" content="SkyPulse privacy policy: no account, no login, data stays on your device." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500&family=Sora:wght@600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{--pitch:#05070A;--bg:#0E131E;--surface:#171B27;--cyan:#00DBE7;--on:#DEE2F2;--muted:#B9CACB;--stroke:rgba(255,255,255,.10)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--pitch);color:var(--on);font-family:Inter,system-ui,sans-serif;line-height:1.7}
+  a{color:var(--cyan);text-decoration:none}
+  .wrap{max-width:760px;margin:0 auto;padding:0 24px}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--stroke)}
+  .brand{font-family:Sora;font-weight:700;font-size:22px;color:var(--cyan)}
+  h1{font-family:Sora;font-weight:700;font-size:34px;margin:40px 0 6px}
+  .updated{font-family:'JetBrains Mono';font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  h2{font-family:Sora;font-weight:600;font-size:20px;margin:32px 0 8px;color:#fff}
+  p,li{color:var(--muted);font-size:16px}
+  ul{margin:8px 0 0 20px}
+  .card{background:var(--surface);border:1px solid var(--stroke);border-radius:16px;padding:20px;margin-top:16px}
+  footer{margin:48px 0;padding-top:24px;border-top:1px solid var(--stroke);color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="index.html">SkyPulse</a>
+    <div><a href="index.html">← Back to home</a></div>
+  </nav>
+
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: June 2026</p>
+
+  <div class="card">
+    <p><strong style="color:#fff">Short version:</strong> SkyPulse has no account and no login.
+    Your saved items and alert rules stay on your device. Your location is used only on your
+    device to find nearby aircraft/airports and to evaluate local alerts — it is never sent to a
+    SkyPulse server, because there isn't one.</p>
+  </div>
+
+  <h2>No account, no login</h2>
+  <p>SkyPulse does not require you to create an account, sign in, or provide any personal
+  information. There is no user profile and no password.</p>
+
+  <h2>Data stored on your device</h2>
+  <p>Saved aircraft, saved airports, saved search areas, alert rules, cached aircraft snapshots,
+  and the bundled airport/airline database are stored locally on your device. The app does not
+  upload this data anywhere.</p>
+
+  <h2>Location</h2>
+  <p>If you grant location permission, your location is used only on-device to:</p>
+  <ul>
+    <li>Center the map and find aircraft and airports near you;</li>
+    <li>Evaluate local alert rules (e.g. an aircraft entering your area).</li>
+  </ul>
+  <p>Your location is not transmitted to any SkyPulse backend. When the app queries open aviation
+  APIs for aircraft in an area, only the requested geographic coordinates/bounding box are sent to
+  those third-party services (below) — never an identifier tied to you.</p>
+
+  <h2>Third-party open data services</h2>
+  <p>To show live data, the app makes requests to free, public services. These services may receive
+  the geographic area being queried and standard request metadata (such as your IP address) as part
+  of normal internet requests:</p>
+  <ul>
+    <li><a href="https://www.adsb.lol/">ADSB.lol</a> — live aircraft (primary)</li>
+    <li><a href="https://opensky-network.org/">OpenSky Network</a> — live aircraft (anonymous fallback)</li>
+    <li><a href="https://www.adsbdb.com/">adsbdb</a> — flight route lookup (origin/destination)</li>
+    <li><a href="https://www.openstreetmap.org/">OpenStreetMap</a> — map tiles</li>
+  </ul>
+  <p>Airport and airline reference data from <a href="https://openflights.org/data.php">OpenFlights</a>
+  is bundled in the app and used entirely offline. Please refer to each provider's own policy for how
+  they handle requests.</p>
+
+  <h2>Diagnostics &amp; analytics (Firebase, free tier)</h2>
+  <p>SkyPulse uses Google Firebase on the free (Spark) tier to improve reliability and quality. None
+  of this requires a login or collects personally identifying information:</p>
+  <ul>
+    <li><strong>Crashlytics</strong> — anonymous crash reports;</li>
+    <li><strong>Analytics</strong> — aggregate, non-personal usage events (e.g. which screens are used);</li>
+    <li><strong>Remote Config</strong> — feature flags / tunable defaults;</li>
+    <li><strong>Cloud Messaging (FCM)</strong> — optional push for announcements.</li>
+  </ul>
+  <p>Google may process this diagnostic data as described in the
+  <a href="https://firebase.google.com/support/privacy">Firebase privacy documentation</a>.</p>
+
+  <h2>Children</h2>
+  <p>SkyPulse is a general-audience aviation utility and is not directed at children, and it does not
+  knowingly collect personal information from anyone.</p>
+
+  <h2>Limits of the data</h2>
+  <p>Free ADS-B data is best-effort: not every aircraft appears, coverage varies, data can be delayed,
+  and some military/private aircraft may be hidden. Route and ETA information is estimated and is not a
+  source of truth for travel planning.</p>
+
+  <h2>Contact</h2>
+  <p>Questions? Open an issue on
+  <a href="https://github.com/chartmann1590/skypulse-android">GitHub</a>.</p>
+
+  <footer>
+    © SkyPulse · <a href="index.html">Home</a> ·
+    <a href="https://buymeacoffee.com/charleshartmann">☕ Buy me a coffee</a>
+  </footer>
+</div>
+</body>
+</html>

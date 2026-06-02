@@ -37,6 +37,8 @@ fun NearbyScreen(viewModel: NearbyViewModel = hiltViewModel()) {
     val sort by viewModel.sort.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val selected by viewModel.selected.collectAsStateWithLifecycle()
+    val selectedRoute by viewModel.selectedRoute.collectAsStateWithLifecycle()
+    val selectedProgress by viewModel.selectedProgress.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize()) {
         SkyTopAppBar()
@@ -105,6 +107,8 @@ fun NearbyScreen(viewModel: NearbyViewModel = hiltViewModel()) {
             speedUnit = settings.speedUnit,
             onDismiss = viewModel::clearSelection,
             onSave = viewModel::toggleSaveSelected,
+            route = selectedRoute,
+            progress = selectedProgress,
         )
     }
 }

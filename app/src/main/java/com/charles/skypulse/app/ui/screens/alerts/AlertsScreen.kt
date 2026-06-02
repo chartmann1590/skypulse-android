@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FlightLand
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.LocalAirport
 import androidx.compose.material.icons.filled.TrackChanges
@@ -138,6 +139,24 @@ fun AlertsScreen(viewModel: AlertsViewModel = hiltViewModel()) {
                 subtitle = "Uses your saved airports",
                 enabled = state.airportEnabled,
                 onToggle = viewModel::setAirportEnabled,
+            )
+
+            // Saved flight departs
+            AlertCard(
+                icon = Icons.Filled.FlightTakeoff,
+                title = "Saved flight departs",
+                subtitle = "When a saved flight takes off (estimated)",
+                enabled = state.departedEnabled,
+                onToggle = viewModel::setDepartedEnabled,
+            )
+
+            // Saved flight landing soon
+            AlertCard(
+                icon = Icons.Filled.FlightLand,
+                title = "Saved flight is landing",
+                subtitle = "Near destination & descending (estimated)",
+                enabled = state.landingEnabled,
+                onToggle = viewModel::setLandingEnabled,
             )
 
             PrimaryButton(

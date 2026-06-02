@@ -25,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -44,6 +45,7 @@ fun SettingsScreen(
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val cacheCleared by viewModel.cacheCleared.collectAsStateWithLifecycle()
+    val uriHandler = LocalUriHandler.current
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
@@ -130,6 +132,18 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            // About + links
+            SettingsCard {
+                Text("About", style = SkyType.TitleMd, color = SkyColors.OnSurface)
+                Text(
+                    "SkyPulse — live aircraft tracking powered by free, open ADS-B data. No account, no API key.",
+                    style = SkyType.BodyMd,
+                    color = SkyColors.OnSurfaceVariant,
+                )
+                LinkRow("Visit the SkyPulse website") { uriHandler.openUri(WEBSITE_URL) }
+                LinkRow("☕ Buy me a coffee") { uriHandler.openUri(BMC_URL) }
+            }
+
             Column(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -141,6 +155,22 @@ fun SettingsScreen(
             }
         }
     }
+}
+
+private const val WEBSITE_URL = "https://chartmann1590.github.io/skypulse-android/"
+private const val BMC_URL = "https://buymeacoffee.com/charleshartmann"
+
+@Composable
+private fun LinkRow(text: String, onClick: () -> Unit) {
+    Text(
+        text,
+        style = SkyType.TitleMd,
+        color = SkyColors.PrimaryFixedDim,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 6.dp),
+    )
 }
 
 @Composable

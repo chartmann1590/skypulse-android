@@ -9,3 +9,7 @@ annotation class AdsbRetrofit
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class OpenSkyRetrofit
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class AdsbDbRetrofit

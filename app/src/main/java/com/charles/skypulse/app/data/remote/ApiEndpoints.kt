@@ -18,10 +18,18 @@ object ApiEndpoints {
     fun adsbRadiusPath(lat: Double, lon: Double, distNm: Int): String =
         "v2/lat/$lat/lon/$lon/dist/$distNm"
 
+    /** ADSB.lol single-aircraft lookups (locate a specific flight anywhere). */
+    fun adsbHexPath(hex: String): String = "v2/hex/$hex"
+    fun adsbCallsignPath(callsign: String): String = "v2/callsign/$callsign"
+
     // ---- OpenSky Network (fallback, anonymous) ----
     // Docs: https://openskynetwork.github.io/opensky-api/rest.html
     const val OPENSKY_BASE_URL = "https://opensky-network.org/api/"
     const val OPENSKY_STATES_PATH = "states/all"
+
+    // ---- adsbdb (free, no-key) route lookup: callsign -> origin/destination ----
+    // Docs: https://www.adsbdb.com/  — no API key, no login required.
+    const val ADSBDB_BASE_URL = "https://api.adsbdb.com/"
 
     /** ADSB.lol caps radius at 250 NM. */
     const val MAX_RADIUS_NM = 250

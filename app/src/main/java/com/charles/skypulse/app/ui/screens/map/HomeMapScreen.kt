@@ -47,6 +47,8 @@ fun HomeMapScreen(
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val userLocation by viewModel.userLocation.collectAsStateWithLifecycle()
     val selected by viewModel.selected.collectAsStateWithLifecycle()
+    val selectedRoute by viewModel.selectedRoute.collectAsStateWithLifecycle()
+    val selectedProgress by viewModel.selectedProgress.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize().background(SkyColors.PitchBlack)) {
         OsmMapView(
@@ -114,6 +116,8 @@ fun HomeMapScreen(
             speedUnit = settings.speedUnit,
             onDismiss = viewModel::clearSelection,
             onSave = viewModel::toggleSaveSelected,
+            route = selectedRoute,
+            progress = selectedProgress,
         )
     }
 }

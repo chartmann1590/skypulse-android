@@ -9,6 +9,12 @@ Google Maps APIs, and **no account or login**.
   <em>Futuristic glassmorphism HUD · Map-first · Privacy-first · 100% free data</em>
 </p>
 
+<p align="center">
+  🌐 <a href="https://chartmann1590.github.io/skypulse-android/">Website</a> ·
+  📜 <a href="https://chartmann1590.github.io/skypulse-android/privacy.html">Privacy Policy</a> ·
+  ☕ <a href="https://buymeacoffee.com/charleshartmann">Buy me a coffee</a>
+</p>
+
 ---
 
 ## No API key required
@@ -19,6 +25,7 @@ SkyPulse needs **no API key, no account, and no secret token**. Just build and r
 |------|--------|-------|
 | Primary live aircraft | [**ADSB.lol**](https://www.adsb.lol/) public API | Radius search around your location |
 | Fallback live aircraft | [**OpenSky Network**](https://opensky-network.org/) anonymous REST | Rate-limited → cached & throttled |
+| Flight routes | [**adsbdb**](https://www.adsbdb.com/) | Callsign → origin/destination airports (no key) |
 | Airports & airlines | [**OpenFlights**](https://openflights.org/data.php) | Bundled as assets, imported into Room on first launch |
 | Map tiles | **OpenStreetMap** via osmdroid | No Google Maps billing |
 
@@ -29,8 +36,9 @@ Free, open ADS-B feeds are best-effort. In particular:
 - **Not every aircraft is guaranteed** to appear — coverage depends on nearby receivers.
 - **Coverage varies by area and time**; data can be **delayed or missing**.
 - **Some military or private aircraft may be hidden or incomplete.**
-- **Gate, boarding, and route status are not provided** by free feeds — SkyPulse shows
-  position/altitude/speed/heading only, and clearly says when route data is unavailable.
+- **Gate, boarding, and scheduled times are not provided** by free feeds. SkyPulse looks
+  up origin/destination from adsbdb when available and **estimates** progress and ETA from
+  the live position + groundspeed — these are estimates, not scheduled times.
 - OpenSky anonymous access is **rate-limited**, so SkyPulse caches results and throttles
   requests (minimum ~8s between network calls, configurable up to 30s).
 
@@ -40,12 +48,15 @@ Free, open ADS-B feeds are best-effort. In particular:
 
 - **Live map** (osmdroid) with aircraft markers rotated to heading; tap for details.
 - **Aircraft detail** "cockpit" sheet: altitude, speed, heading, vertical rate, last seen.
+- **Flight route & ETA**: origin → destination (via the free adsbdb API) with an estimated
+  progress bar and time-remaining computed from the live position + groundspeed.
 - **Nearby** list with Closest / Highest / Fastest / Recent sorting (Haversine distance).
 - **Airport lookup** over the full OpenFlights dataset: search by name, city, country,
   IATA, or ICAO; "airports near you"; "view nearby aircraft".
 - **Local alerts** (no backend): aircraft enters radius, specific callsign appears,
-  low-altitude flight nearby, activity near a saved airport — evaluated on-device by
-  WorkManager and shown as local notifications.
+  low-altitude flight nearby, activity near a saved airport, plus best-effort
+  **saved-flight departed / landing-soon** alerts (estimated from live ADS-B + route data) —
+  all evaluated on-device by WorkManager and shown as local notifications.
 - **Saved** aircraft, airports, and areas (Room).
 - **Settings** (DataStore): refresh interval, distance/altitude/speed units, data-source
   status, clear cache.
@@ -121,12 +132,19 @@ Firebase console, download your `google-services.json`, and replace `app/google-
 
 No account, no login. Saved items and alert rules stay in an on-device database and are
 never uploaded by the app. Location is used only on-device for nearby aircraft and alerts.
-See the in-app **Privacy** screen for the full statement.
+See the in-app **Privacy** screen, or the full
+[Privacy Policy](https://chartmann1590.github.io/skypulse-android/privacy.html).
+
+## Support
+
+If SkyPulse is useful to you, you can support development here:
+**[☕ Buy me a coffee](https://buymeacoffee.com/charleshartmann)**. Thank you!
 
 ## Data attribution & licenses
 
 - Aircraft data © [ADSB.lol](https://www.adsb.lol/) and the
   [OpenSky Network](https://opensky-network.org/) (anonymous access).
+- Flight routes from [adsbdb](https://www.adsbdb.com/).
 - Airport/airline data from [OpenFlights](https://openflights.org/data.php).
 - Map tiles © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
 

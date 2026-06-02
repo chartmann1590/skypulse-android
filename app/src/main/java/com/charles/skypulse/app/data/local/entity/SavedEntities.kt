@@ -49,6 +49,19 @@ data class AlertRuleEntity(
     val anchorLon: Double?,
 )
 
+/**
+ * Tracks per-saved-flight state across worker runs so departure (on-ground -> airborne)
+ * and landing-soon events can be detected and de-duplicated.
+ */
+@Entity(tableName = "watched_flight_state")
+data class WatchedFlightStateEntity(
+    @PrimaryKey val id: String, // saved aircraft id (hex or callsign)
+    val lastOnGround: Boolean,
+    val departedNotifiedAtMs: Long,
+    val landingNotifiedAtMs: Long,
+    val updatedAtMs: Long,
+)
+
 /** A cached aircraft snapshot row, used for offline/throttled responses. */
 @Entity(tableName = "cached_aircraft")
 data class CachedAircraftEntity(

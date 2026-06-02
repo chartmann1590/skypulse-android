@@ -7,10 +7,14 @@ import com.charles.skypulse.app.data.firebase.RemoteConfigProvider
 import com.charles.skypulse.app.data.location.LocationProvider
 import com.charles.skypulse.app.data.repository.AircraftFeedState
 import com.charles.skypulse.app.data.repository.AircraftRepository
+import com.charles.skypulse.app.data.repository.RouteRepository
 import com.charles.skypulse.app.data.repository.SavedRepository
 import com.charles.skypulse.app.data.settings.SettingsDataStore
 import com.charles.skypulse.app.data.settings.SkySettings
 import com.charles.skypulse.app.domain.model.Aircraft
+import com.charles.skypulse.app.domain.model.FlightRoute
+import com.charles.skypulse.app.domain.model.RouteProgress
+import com.charles.skypulse.app.domain.util.RouteEstimator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +34,7 @@ class HomeMapViewModel @Inject constructor(
     private val aircraftRepository: AircraftRepository,
     private val locationProvider: LocationProvider,
     private val savedRepository: SavedRepository,
+    private val routeRepository: RouteRepository,
     private val analytics: Analytics,
     private val remoteConfig: RemoteConfigProvider,
     settingsDataStore: SettingsDataStore,
@@ -45,6 +50,12 @@ class HomeMapViewModel @Inject constructor(
 
     private val _selected = MutableStateFlow<Aircraft?>(null)
     val selected: StateFlow<Aircraft?> = _selected.asStateFlow()
+
+    private val _selectedRoute = MutableStateFlow<FlightRoute?>(null)
+    val selectedRoute: StateFlow<FlightRoute?> = _selectedRoute.asStateFlow()
+
+    private val _selectedProgress = MutableStateFlow<RouteProgress?>(null)
+    val selectedProgress: StateFlow<RouteProgress?> = _selectedProgress.asStateFlow()
 
     private val radiusNm: Int get() = remoteConfig.defaultRadiusNm.coerceIn(10, 250)
 
@@ -83,11 +94,24 @@ class HomeMapViewModel @Inject constructor(
 
     fun select(aircraft: Aircraft) {
         _selected.value = aircraft
+        _selectedRoute.value = null
+        _selectedProgress.value = null
         analytics.logAircraftTapped(aircraft.source.name)
+        viewModelScope.launch {
+            val route = routeRepository.routeForCallsign(aircraft.callsign)
+            if (route != null && _selected.value?.id == aircraft.id) {
+                _selectedRoute.value = route
+                _selectedProgress.value = RouteEstimator.estimate(
+                    route, aircraft.latitude, aircraft.longitude, aircraft.speedKnots,
+                )
+            }
+        }
     }
 
     fun clearSelection() {
         _selected.value = null
+        _selectedRoute.value = null
+        _selectedProgress.value = null
     }
 
     fun toggleSaveSelected() {

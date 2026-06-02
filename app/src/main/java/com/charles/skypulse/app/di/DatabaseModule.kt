@@ -8,6 +8,7 @@ import com.charles.skypulse.app.data.local.dao.AirportDao
 import com.charles.skypulse.app.data.local.dao.AlertDao
 import com.charles.skypulse.app.data.local.dao.CacheDao
 import com.charles.skypulse.app.data.local.dao.SavedDao
+import com.charles.skypulse.app.data.local.dao.WatchedFlightDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,4 +32,5 @@ object DatabaseModule {
     @Provides fun provideSavedDao(db: SkyPulseDatabase): SavedDao = db.savedDao()
     @Provides fun provideAlertDao(db: SkyPulseDatabase): AlertDao = db.alertDao()
     @Provides fun provideCacheDao(db: SkyPulseDatabase): CacheDao = db.cacheDao()
+    @Provides fun provideWatchedFlightDao(db: SkyPulseDatabase): WatchedFlightDao = db.watchedFlightDao()
 }

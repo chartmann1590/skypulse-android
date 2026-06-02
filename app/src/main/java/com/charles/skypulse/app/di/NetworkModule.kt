@@ -1,5 +1,6 @@
 package com.charles.skypulse.app.di
 
+import com.charles.skypulse.app.data.remote.AdsbDbApi
 import com.charles.skypulse.app.data.remote.AdsbLolApi
 import com.charles.skypulse.app.data.remote.ApiEndpoints
 import com.charles.skypulse.app.data.remote.OpenSkyApi
@@ -78,4 +79,19 @@ object NetworkModule {
     @Singleton
     fun provideOpenSkyApi(@OpenSkyRetrofit retrofit: Retrofit): OpenSkyApi =
         retrofit.create(OpenSkyApi::class.java)
+
+    @Provides
+    @Singleton
+    @AdsbDbRetrofit
+    fun provideAdsbDbRetrofit(client: OkHttpClient, json: Json): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(ApiEndpoints.ADSBDB_BASE_URL)
+            .client(client)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideAdsbDbApi(@AdsbDbRetrofit retrofit: Retrofit): AdsbDbApi =
+        retrofit.create(AdsbDbApi::class.java)
 }

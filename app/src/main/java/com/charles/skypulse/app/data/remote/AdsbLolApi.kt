@@ -13,4 +13,12 @@ interface AdsbLolApi {
         @Path("lon") lon: Double,
         @Path("dist") distNm: Int,
     ): AdsbResponse
+
+    /** Locate a specific aircraft anywhere by ICAO hex. */
+    @GET("v2/hex/{hex}")
+    suspend fun getByHex(@Path("hex") hex: String): AdsbResponse
+
+    /** Locate a specific aircraft anywhere by callsign. */
+    @GET("v2/callsign/{callsign}")
+    suspend fun getByCallsign(@Path("callsign") callsign: String): AdsbResponse
 }

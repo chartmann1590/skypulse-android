@@ -3,9 +3,11 @@ package com.charles.skypulse.app.ui.screens.map
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -15,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Radar
@@ -29,10 +32,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.charles.skypulse.app.domain.model.Aircraft
 import com.charles.skypulse.app.domain.model.AltitudeUnit
+import com.charles.skypulse.app.domain.model.FlightRoute
+import com.charles.skypulse.app.domain.model.RouteProgress
 import com.charles.skypulse.app.domain.model.SpeedUnit
 import com.charles.skypulse.app.domain.util.FormatUtils
 import com.charles.skypulse.app.ui.components.GhostButton
@@ -51,6 +57,8 @@ fun AircraftDetailSheet(
     speedUnit: SpeedUnit,
     onDismiss: () -> Unit,
     onSave: () -> Unit,
+    route: FlightRoute? = null,
+    progress: RouteProgress? = null,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -114,11 +122,15 @@ fun AircraftDetailSheet(
                 items(cells) { cell -> CockpitCell(cell) }
             }
 
-            Text(
-                "Route data is not available on free open ADS-B feeds.",
-                style = SkyType.LabelSm,
-                color = SkyColors.OnSurfaceVariant,
-            )
+            if (route != null) {
+                RouteStrip(route, progress)
+            } else {
+                Text(
+                    "Route data unavailable for this flight on free feeds.",
+                    style = SkyType.LabelSm,
+                    color = SkyColors.OnSurfaceVariant,
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -138,6 +150,73 @@ fun AircraftDetailSheet(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun RouteStrip(route: FlightRoute, progress: RouteProgress?) {
+    val shape = RoundedCornerShape(16.dp)
+    val fraction = (progress?.fractionComplete ?: 0.0).toFloat().coerceIn(0f, 1f)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(SkyColors.SurfaceContainerLowest, shape)
+            .border(1.dp, SkyColors.GlassStroke, shape)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top,
+        ) {
+            RouteEnd(route.origin.code, route.origin.city ?: route.origin.name, Alignment.Start)
+            route.airlineName?.let {
+                Text(it, style = SkyType.LabelSm, color = SkyColors.OnSurfaceVariant)
+            }
+            RouteEnd(route.destination.code, route.destination.city ?: route.destination.name, Alignment.End)
+        }
+        // Progress track with plane marker.
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .align(Alignment.CenterStart)
+                    .clip(RoundedCornerShape(50))
+                    .background(SkyColors.OutlineVariant, RoundedCornerShape(50)),
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(fraction)
+                    .height(3.dp)
+                    .align(Alignment.CenterStart)
+                    .clip(RoundedCornerShape(50))
+                    .background(SkyColors.PrimaryFixedDim, RoundedCornerShape(50)),
+            )
+            Box(modifier = Modifier.fillMaxWidth(fraction), contentAlignment = Alignment.CenterEnd) {
+                Icon(
+                    Icons.Filled.Flight,
+                    contentDescription = null,
+                    tint = SkyColors.PrimaryFixedDim,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+        }
+        val etaText = when {
+            progress?.etaMinutes != null -> "~${progress.etaMinutes} min left · ${progress.remainingNm.toInt()} NM (est.)"
+            progress != null -> "${progress.remainingNm.toInt()} NM to go (est.)"
+            else -> "Estimated from live position"
+        }
+        Text(etaText, style = SkyType.LabelSm, color = SkyColors.OnSurfaceVariant)
+    }
+}
+
+@Composable
+private fun RouteEnd(code: String, name: String?, align: Alignment.Horizontal) {
+    Column(horizontalAlignment = align) {
+        Text(code, style = SkyType.HeadlineLgMobile, color = SkyColors.TextHigh)
+        name?.let { Text(it, style = SkyType.LabelSm, color = SkyColors.Outline) }
     }
 }
 

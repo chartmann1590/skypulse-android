@@ -23,6 +23,8 @@ data class AlertsUiState(
     val lowAltEnabled: Boolean = false,
     val altitudeThresholdFeet: Float = 5000f,
     val airportEnabled: Boolean = false,
+    val departedEnabled: Boolean = false,
+    val landingEnabled: Boolean = false,
     val saved: Boolean = false,
 )
 
@@ -48,6 +50,8 @@ class AlertsViewModel @Inject constructor(
                 lowAltEnabled = rules[AlertType.LOW_ALTITUDE_NEARBY]?.enabled ?: false,
                 altitudeThresholdFeet = (rules[AlertType.LOW_ALTITUDE_NEARBY]?.altitudeThresholdFeet ?: 5000.0).toFloat(),
                 airportEnabled = rules[AlertType.AIRPORT_ACTIVITY_NEARBY]?.enabled ?: false,
+                departedEnabled = rules[AlertType.FLIGHT_DEPARTED]?.enabled ?: false,
+                landingEnabled = rules[AlertType.FLIGHT_LANDING_SOON]?.enabled ?: false,
             )
         }
     }
@@ -59,6 +63,8 @@ class AlertsViewModel @Inject constructor(
     fun setLowAltEnabled(v: Boolean) = update { it.copy(lowAltEnabled = v, saved = false) }
     fun setAltitude(v: Float) = update { it.copy(altitudeThresholdFeet = v, saved = false) }
     fun setAirportEnabled(v: Boolean) = update { it.copy(airportEnabled = v, saved = false) }
+    fun setDepartedEnabled(v: Boolean) = update { it.copy(departedEnabled = v, saved = false) }
+    fun setLandingEnabled(v: Boolean) = update { it.copy(landingEnabled = v, saved = false) }
 
     fun savePreferences() {
         val s = _state.value
@@ -67,6 +73,8 @@ class AlertsViewModel @Inject constructor(
             AlertRule(type = AlertType.SPECIFIC_CALLSIGN, enabled = s.callsignEnabled, callsign = s.callsign.trim()),
             AlertRule(type = AlertType.LOW_ALTITUDE_NEARBY, enabled = s.lowAltEnabled, altitudeThresholdFeet = s.altitudeThresholdFeet.toDouble(), radiusNm = s.radiusNm.toDouble()),
             AlertRule(type = AlertType.AIRPORT_ACTIVITY_NEARBY, enabled = s.airportEnabled, radiusNm = s.radiusNm.toDouble()),
+            AlertRule(type = AlertType.FLIGHT_DEPARTED, enabled = s.departedEnabled),
+            AlertRule(type = AlertType.FLIGHT_LANDING_SOON, enabled = s.landingEnabled),
         )
         viewModelScope.launch {
             alertRepository.saveAll(rules)
