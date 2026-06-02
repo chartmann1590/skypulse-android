@@ -1,7 +1,7 @@
 package com.charles.skypulse.app.domain.model
 
 /** Where a given snapshot of aircraft came from. */
-enum class DataSource { ADSB_LOL, OPENSKY, CACHE }
+enum class DataSource { ADSB_LOL, OPENSKY, FR24, CACHE }
 
 /**
  * Normalized aircraft model shared across the app, independent of the source API.

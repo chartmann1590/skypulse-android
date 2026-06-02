@@ -65,8 +65,8 @@ object RouteEstimator {
         val o = route.origin
         val d = route.destination
         val total = GeoUtils.haversineNm(o.latitude, o.longitude, d.latitude, d.longitude)
-        if (currentLat == null || currentLon == null || total <= 0.0) {
-            return RouteProgress(fractionComplete = 0.0, remainingNm = total, etaMinutes = null)
+        if (currentLat == null || currentLon == null || total.isNaN() || total <= 0.0) {
+            return RouteProgress(fractionComplete = 0.0, remainingNm = if (total.isNaN()) 0.0 else total, etaMinutes = null)
         }
         val remaining = GeoUtils.haversineNm(currentLat, currentLon, d.latitude, d.longitude)
             .coerceIn(0.0, total)

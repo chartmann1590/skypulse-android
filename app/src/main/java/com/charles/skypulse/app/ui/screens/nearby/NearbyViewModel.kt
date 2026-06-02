@@ -107,10 +107,7 @@ class NearbyViewModel @Inject constructor(
         _selectedRoute.value = null
         _selectedProgress.value = null
         viewModelScope.launch {
-            val route = routeRepository.routeForCallsign(aircraft.callsign)
-                ?.takeIf {
-                    RouteEstimator.isConsistent(it, aircraft.latitude, aircraft.longitude, aircraft.onGround, aircraft.altitudeFeet)
-                }
+            val route = routeRepository.routeForAircraft(aircraft)
             if (route != null && _selected.value?.id == aircraft.id) {
                 _selectedRoute.value = route
                 _selectedProgress.value = RouteEstimator.estimate(

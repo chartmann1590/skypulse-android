@@ -3,6 +3,7 @@ package com.charles.skypulse.app.di
 import com.charles.skypulse.app.data.remote.AdsbDbApi
 import com.charles.skypulse.app.data.remote.AdsbLolApi
 import com.charles.skypulse.app.data.remote.ApiEndpoints
+import com.charles.skypulse.app.data.remote.Fr24Api
 import com.charles.skypulse.app.data.remote.OpenSkyApi
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -47,10 +48,16 @@ object NetworkModule {
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor { chain ->
-                // Identify the client politely to the open APIs.
-                val request = chain.request().newBuilder()
-                    .header("User-Agent", "SkyPulse/1.0 (Android; open ADS-B client)")
-                    .build()
+                // Identify the client to the open APIs, but don't clobber a per-request
+                // User-Agent (FR24's feed needs a browser UA set via @Headers).
+                val original = chain.request()
+                val request = if (original.header("User-Agent") == null) {
+                    original.newBuilder()
+                        .header("User-Agent", "SkyPulse/1.0 (Android; open ADS-B client)")
+                        .build()
+                } else {
+                    original
+                }
                 chain.proceed(request)
             }
             .addInterceptor(logging)
@@ -101,4 +108,19 @@ object NetworkModule {
     @Singleton
     fun provideAdsbDbApi(@AdsbDbRetrofit retrofit: Retrofit): AdsbDbApi =
         retrofit.create(AdsbDbApi::class.java)
+
+    @Provides
+    @Singleton
+    @Fr24Retrofit
+    fun provideFr24Retrofit(client: OkHttpClient, json: Json): Retrofit =
+        Retrofit.Builder()
+            .baseUrl(ApiEndpoints.FR24_BASE_URL)
+            .client(client)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+
+    @Provides
+    @Singleton
+    fun provideFr24Api(@Fr24Retrofit retrofit: Retrofit): Fr24Api =
+        retrofit.create(Fr24Api::class.java)
 }

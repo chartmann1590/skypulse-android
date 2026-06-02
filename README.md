@@ -1,9 +1,10 @@
 # SkyPulse ✈️
 
 **SkyPulse** is a native Android live aircraft tracker built with Kotlin and Jetpack
-Compose. It shows aircraft around you on an OpenStreetMap map using **only free, open,
-no-key data sources** — no FlightAware, FlightRadar24, AviationStack, RapidAPI, or paid
-Google Maps APIs, and **no account or login**.
+Compose. It shows aircraft around you on an OpenStreetMap map using **free, no-key data
+sources** — **no API key, no paid plan, and no account or login**. (Accurate flight
+routes / airport arrival & departure boards use Flightradar24's public live feed, which
+needs no key; it's an unofficial endpoint, so adsbdb is kept as a fallback.)
 
 <p align="center">
   <em>Futuristic glassmorphism HUD · Map-first · Privacy-first · 100% free data</em>
@@ -25,7 +26,8 @@ SkyPulse needs **no API key, no account, and no secret token**. Just build and r
 |------|--------|-------|
 | Primary live aircraft | [**ADSB.lol**](https://www.adsb.lol/) public API | Radius search around your location |
 | Fallback live aircraft | [**OpenSky Network**](https://opensky-network.org/) anonymous REST | Rate-limited → cached & throttled |
-| Flight routes | [**adsbdb**](https://www.adsbdb.com/) | Callsign → origin/destination airports (no key) |
+| Flight routes / airport boards | **Flightradar24 live feed** (unofficial, keyless) | Per-aircraft origin/destination → real arrivals/departures incl. en route |
+| Flight routes (fallback) | [**adsbdb**](https://www.adsbdb.com/) | Callsign → origin/destination, validated against live position |
 | Airports & airlines | [**OpenFlights**](https://openflights.org/data.php) | Bundled as assets, imported into Room on first launch |
 | Map tiles | **OpenStreetMap** via osmdroid | No Google Maps billing |
 

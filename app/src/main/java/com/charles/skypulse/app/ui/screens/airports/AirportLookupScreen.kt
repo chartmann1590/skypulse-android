@@ -190,8 +190,10 @@ fun AirportLookupScreen(viewModel: AirportViewModel = hiltViewModel()) {
                     )
                     else -> focusFlights.forEach { flight ->
                         val subtitle = when (flight.role) {
-                            FlightRole.ARRIVING -> "Arriving · from ${flight.route?.origin?.code}"
-                            FlightRole.DEPARTING -> "Departing · to ${flight.route?.destination?.code}"
+                            FlightRole.ARRIVING ->
+                                "Arriving" + (flight.route?.origin?.code?.takeIf { it.isNotBlank() }?.let { " · from $it" } ?: "")
+                            FlightRole.DEPARTING ->
+                                "Departing" + (flight.route?.destination?.code?.takeIf { it.isNotBlank() }?.let { " · to $it" } ?: "")
                             FlightRole.NEARBY -> "Nearby · ${flight.aircraft.typeCode ?: "in the area"}"
                         }
                         val accent = when (flight.role) {
