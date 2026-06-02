@@ -7,7 +7,33 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.firebase.perf)
 }
+
+import java.util.Properties
+
+// Load local.properties (kept out of version control) so secrets like AdMob unit IDs and the
+// release keystore never live in tracked source. Order of precedence for each value:
+//   1. local.properties   2. environment variable (used by CI)   3. a safe fallback.
+val localProps = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+
+fun secret(key: String, fallback: String): String =
+    (localProps.getProperty(key) ?: System.getenv(key) ?: fallback)
+
+// Google's official AdMob *test* IDs — used whenever real IDs aren't configured, so debug/PR
+// builds never serve (or accidentally click) real ads. See https://developers.google.com/admob/android/test-ads
+val testAdAppId = "ca-app-pub-3940256099942544~3347511713"
+val testBannerId = "ca-app-pub-3940256099942544/9214589741"
+val testInterstitialId = "ca-app-pub-3940256099942544/1033173712"
+val testRewardedId = "ca-app-pub-3940256099942544/5224354917"
+
+val admobAppId = secret("ADMOB_APP_ID", testAdAppId)
+val admobBannerId = secret("ADMOB_BANNER_ID", testBannerId)
+val admobInterstitialId = secret("ADMOB_INTERSTITIAL_ID", testInterstitialId)
+val admobRewardedId = secret("ADMOB_REWARDED_ID", testRewardedId)
 
 android {
     namespace = "com.charles.skypulse.app"
@@ -22,6 +48,29 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
+
+        // AdMob unit IDs — never hardcoded; sourced from local.properties / CI secrets (see top of file).
+        buildConfigField("String", "ADMOB_BANNER_ID", "\"$admobBannerId\"")
+        buildConfigField("String", "ADMOB_INTERSTITIAL_ID", "\"$admobInterstitialId\"")
+        buildConfigField("String", "ADMOB_REWARDED_ID", "\"$admobRewardedId\"")
+        // AdMob application id is required as a manifest <meta-data> entry.
+        manifestPlaceholders["admobAppId"] = admobAppId
+    }
+
+    signingConfigs {
+        create("release") {
+            val keystorePath = secret("KEYSTORE_FILE", "")
+            val ksFile = if (keystorePath.isNotBlank()) rootProject.file(keystorePath) else null
+            val ksPassword = secret("KEYSTORE_PASSWORD", "")
+            // Only wire up signing when a real, non-empty keystore + password are present, so that
+            // missing/empty CI secrets fall back to an unsigned release instead of failing the build.
+            if (ksFile != null && ksFile.exists() && ksFile.length() > 0L && ksPassword.isNotBlank()) {
+                storeFile = ksFile
+                storePassword = ksPassword
+                keyAlias = secret("KEY_ALIAS", "")
+                keyPassword = secret("KEY_PASSWORD", "")
+            }
+        }
     }
 
     buildTypes {
@@ -36,6 +85,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Sign with the release keystore only when one is configured (CI / local secrets);
+            // otherwise the release build stays unsigned so PR/local `assembleRelease` still works.
+            val releaseSigning = signingConfigs.getByName("release")
+            if (releaseSigning.storeFile != null) {
+                signingConfig = releaseSigning
+            }
         }
     }
 
@@ -109,6 +164,11 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.config)
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.perf)
+
+    // Ads (AdMob) + Google UMP consent
+    implementation(libs.play.services.ads)
+    implementation(libs.user.messaging.platform)
 
     // Tests
     testImplementation(libs.junit)

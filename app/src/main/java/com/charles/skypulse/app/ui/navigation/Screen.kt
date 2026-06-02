@@ -23,6 +23,7 @@ object Routes {
     const val SAVED = "saved"
     const val SETTINGS = "settings"
     const val PRIVACY = "privacy"
+    const val REWARDS = "rewards"
 }
 
 /** Bottom navigation destinations (the five primary tabs). */

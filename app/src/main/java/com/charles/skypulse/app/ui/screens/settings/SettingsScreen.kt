@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Icon
@@ -41,6 +42,7 @@ import com.charles.skypulse.app.ui.theme.SkyType
 fun SettingsScreen(
     onBack: () -> Unit,
     onOpenPrivacy: () -> Unit,
+    onOpenRewards: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -108,6 +110,22 @@ fun SettingsScreen(
                     labels = listOf("Miles", "Km", "NM"),
                     onSelect = { viewModel.setDistanceUnit(DistanceUnit.entries[it]) },
                 )
+            }
+
+            // Ad-free rewards
+            SettingsCard {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(Icons.Filled.CardGiftcard, null, tint = SkyColors.PrimaryFixedDim)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Ad-free rewards", style = SkyType.TitleMd, color = SkyColors.OnSurface)
+                        Text(
+                            "Watch ads to earn credits and unlock ad-free time.",
+                            style = SkyType.LabelSm,
+                            color = SkyColors.OnSurfaceVariant,
+                        )
+                    }
+                }
+                GhostButton("Open rewards", onClick = onOpenRewards, modifier = Modifier.fillMaxWidth())
             }
 
             // Privacy

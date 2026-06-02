@@ -54,7 +54,15 @@ fun PrivacyScreen(onBack: () -> Unit) {
             )
             Section(
                 "Diagnostics (Firebase, free tier)",
-                "Anonymous crash reports (Crashlytics) and aggregate, non-personal usage analytics help improve the app. Remote Config delivers feature flags. Optional push (FCM) may be used for announcements. None of these require a login or collect personally identifying information.",
+                "Anonymous crash reports (Crashlytics), aggregate non-personal usage analytics (Google Analytics for Firebase), and app performance metrics (Firebase Performance Monitoring) help improve the app. Remote Config delivers feature flags. Optional push (FCM) may be used for announcements. None of these require a login or collect personally identifying information.",
+            )
+            Section(
+                "Ads (Google AdMob)",
+                "SkyPulse is free and shows ads via Google AdMob (a banner, occasional full-screen ads, and optional rewarded ads). Google may use a device advertising identifier to serve and measure ads. On first launch you'll see a consent choice (Google's User Messaging Platform) where required by law; you can change it later. See Google's policies for how ad data is handled.",
+            )
+            Section(
+                "Ad-free rewards",
+                "You can watch optional rewarded ads to earn credits and unlock ad-free time. Your credits and ad-free timer are stored only on your device and reset daily — they are not tied to any account or sent anywhere.",
             )
             Section(
                 "Limits of free ADS-B data",

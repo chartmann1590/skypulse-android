@@ -1,0 +1,27 @@
+# SkyPulse — local.properties template
+#
+# Copy this file to `local.properties` (which is git-ignored) and fill in your values.
+# `local.properties` must NEVER be committed — it holds secrets.
+#
+# In CI these same values are provided as environment variables from GitHub Secrets,
+# so the keys here double as the list of secrets the release workflow expects.
+
+# Android SDK location (set automatically by Android Studio).
+sdk.dir=/path/to/Android/Sdk
+
+# ── AdMob ─────────────────────────────────────────────────────────────────────
+# Real production IDs go here (and in GitHub Secrets). When left blank, the build
+# falls back to Google's official AdMob *test* IDs, so debug builds never serve
+# real ads. See https://developers.google.com/admob/android/test-ads
+ADMOB_APP_ID=ca-app-pub-xxxxxxxxxxxxxxxx~xxxxxxxxxx
+ADMOB_BANNER_ID=ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx
+ADMOB_INTERSTITIAL_ID=ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx
+ADMOB_REWARDED_ID=ca-app-pub-xxxxxxxxxxxxxxxx/xxxxxxxxxx
+
+# ── Release signing (optional locally; required in CI) ─────────────────────────
+# Path is relative to the repo root. In CI the keystore is decoded from the
+# KEYSTORE_BASE64 secret to this path.
+KEYSTORE_FILE=
+KEYSTORE_PASSWORD=
+KEY_ALIAS=
+KEY_PASSWORD=

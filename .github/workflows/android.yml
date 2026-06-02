@@ -7,6 +7,7 @@ on:
     branches: [ main, master ]
 
 jobs:
+  # Runs on every push and PR: unit tests + a debug build (uses AdMob *test* IDs).
   build-and-test:
     runs-on: ubuntu-latest
 
@@ -38,3 +39,84 @@ jobs:
           name: skypulse-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
+
+  # Runs only on pushes to main: bump versionCode, build a SIGNED release APK + AAB with the
+  # real AdMob IDs (from secrets), and publish a GitHub Release.
+  release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Bump versionCode and commit
+        id: ver
+        run: |
+          CURRENT=$(grep -oP 'versionCode = \K[0-9]+' app/build.gradle.kts)
+          NEXT=$((CURRENT + 1))
+          sed -i "s/versionCode = ${CURRENT}/versionCode = ${NEXT}/" app/build.gradle.kts
+          NAME=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          echo "code=${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: bump versionCode to ${NEXT} [skip ci]"
+          git push
+
+      - name: Write local.properties from secrets (enables real ads)
+        run: |
+          cat > local.properties <<EOF
+          ADMOB_APP_ID=${{ secrets.ADMOB_APP_ID }}
+          ADMOB_BANNER_ID=${{ secrets.ADMOB_BANNER_ID }}
+          ADMOB_INTERSTITIAL_ID=${{ secrets.ADMOB_INTERSTITIAL_ID }}
+          ADMOB_REWARDED_ID=${{ secrets.ADMOB_REWARDED_ID }}
+          KEYSTORE_FILE=keystore.jks
+          KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      - name: Decode release keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+
+      - name: Build signed release APK and AAB
+        run: ./gradlew assembleRelease bundleRelease --stacktrace
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: skypulse-release
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ver.outputs.name }}+${{ steps.ver.outputs.code }}
+          name: SkyPulse v${{ steps.ver.outputs.name }} (build ${{ steps.ver.outputs.code }})
+          generate_release_notes: true
+          files: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+
+      - name: Clean up secrets
+        if: always()
+        run: rm -f keystore.jks local.properties

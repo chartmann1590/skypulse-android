@@ -28,6 +28,14 @@ class Analytics @Inject constructor(
     fun logDataSourceFallback(from: String, to: String) =
         log("data_source_fallback", "from" to from, "to" to to)
 
+    fun logRewardEarned() = log("ad_reward_earned")
+
+    fun logAdFreeActivated() = log("ad_free_activated")
+
+    fun logInterstitialShown() = log("interstitial_shown")
+
+    fun logRewardsOpened() = log("rewards_opened")
+
     private fun log(event: String, vararg params: Pair<String, String>) {
         firebaseAnalytics.logEvent(event, Bundle().apply {
             params.forEach { (k, v) -> putString(k, v) }

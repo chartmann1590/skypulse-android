@@ -33,6 +33,7 @@ import com.charles.skypulse.app.domain.model.DataSource
 import com.charles.skypulse.app.domain.util.FormatUtils
 import com.charles.skypulse.app.ui.components.AircraftListItem
 import com.charles.skypulse.app.ui.components.StatusBadge
+import com.charles.skypulse.app.ui.screens.rewards.RewardsChip
 import com.charles.skypulse.app.ui.theme.SkyColors
 import com.charles.skypulse.app.ui.theme.SkyType
 import com.charles.skypulse.app.ui.theme.glassPanel
@@ -42,6 +43,7 @@ import com.charles.skypulse.app.ui.theme.glassPanel
 fun HomeMapScreen(
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit,
+    onOpenRewards: () -> Unit,
     viewModel: HomeMapViewModel = hiltViewModel(),
 ) {
     val feed by viewModel.feed.collectAsStateWithLifecycle()
@@ -91,7 +93,9 @@ fun HomeMapScreen(
                 .align(Alignment.CenterEnd)
                 .padding(end = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.End,
         ) {
+            RewardsChip(onClick = onOpenRewards)
             MapFab(Icons.Filled.MyLocation, "Recenter", viewModel::recenter)
             MapFab(Icons.Filled.Tune, "Settings", onOpenSettings)
         }

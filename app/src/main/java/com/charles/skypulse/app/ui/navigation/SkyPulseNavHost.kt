@@ -1,27 +1,36 @@
 package com.charles.skypulse.app.ui.navigation
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.charles.skypulse.app.ui.ads.BannerAd
+import com.charles.skypulse.app.ui.ads.findActivity
 import com.charles.skypulse.app.ui.screens.airports.AirportLookupScreen
 import com.charles.skypulse.app.ui.screens.alerts.AlertsScreen
 import com.charles.skypulse.app.ui.screens.map.HomeMapScreen
 import com.charles.skypulse.app.ui.screens.nearby.NearbyScreen
 import com.charles.skypulse.app.ui.screens.onboarding.OnboardingScreen
 import com.charles.skypulse.app.ui.screens.privacy.PrivacyScreen
+import com.charles.skypulse.app.ui.screens.rewards.RewardsIntroDialog
+import com.charles.skypulse.app.ui.screens.rewards.RewardsScreen
 import com.charles.skypulse.app.ui.screens.saved.SavedScreen
 import com.charles.skypulse.app.ui.screens.settings.SettingsScreen
 import com.charles.skypulse.app.ui.screens.splash.SplashScreen
+
+private val NO_BANNER_ROUTES = setOf(Routes.SPLASH, Routes.ONBOARDING)
 
 @Composable
 fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
@@ -29,21 +38,36 @@ fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
     val showBottomBar = currentRoute in BOTTOM_BAR_ROUTES
+    val showBanner = currentRoute != null && currentRoute !in NO_BANNER_ROUTES
+
+    val adFree by appViewModel.adFree.collectAsStateWithLifecycle()
+    val showRewardsIntro by appViewModel.showRewardsIntro.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Scaffold(
         containerColor = Color.Transparent,
         bottomBar = {
-            if (showBottomBar) {
-                SkyPulseBottomBar(
-                    currentRoute = currentRoute,
-                    onTabSelected = { tab ->
-                        navController.navigate(tab.route) {
-                            popUpTo(Routes.MAP) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    },
-                )
+            // The bottom cluster owns the system-nav inset so the banner sits *below* the nav bar
+            // but *above* the system navigation bar, on every screen that shows it.
+            if (showBottomBar || showBanner) {
+                Column(modifier = Modifier.navigationBarsPadding()) {
+                    if (showBottomBar) {
+                        SkyPulseBottomBar(
+                            currentRoute = currentRoute,
+                            onTabSelected = { tab ->
+                                context.findActivity()?.let(appViewModel::maybeShowInterstitial)
+                                navController.navigate(tab.route) {
+                                    popUpTo(Routes.MAP) { saveState = true }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
+                            },
+                        )
+                    }
+                    if (showBanner) {
+                        BannerAd(adFree = adFree)
+                    }
+                }
             }
         },
     ) { innerPadding ->
@@ -78,6 +102,7 @@ fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
             composable(Routes.MAP) {
                 HomeMapScreen(
                     onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                    onOpenRewards = { navController.navigate(Routes.REWARDS) },
                     onOpenSearch = {
                         navController.navigate(Routes.AIRPORTS) {
                             popUpTo(Routes.MAP) { saveState = true }
@@ -86,6 +111,17 @@ fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
                         }
                     },
                 )
+
+                // First-open explanation of the ad-free rewards system.
+                if (showRewardsIntro) {
+                    RewardsIntroDialog(
+                        onLearnMore = {
+                            appViewModel.markRewardsIntroSeen()
+                            navController.navigate(Routes.REWARDS)
+                        },
+                        onDismiss = { appViewModel.markRewardsIntroSeen() },
+                    )
+                }
             }
             composable(Routes.NEARBY) { NearbyScreen() }
             composable(Routes.AIRPORTS) { AirportLookupScreen() }
@@ -95,10 +131,14 @@ fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
                 SettingsScreen(
                     onBack = { navController.popBackStack() },
                     onOpenPrivacy = { navController.navigate(Routes.PRIVACY) },
+                    onOpenRewards = { navController.navigate(Routes.REWARDS) },
                 )
             }
             composable(Routes.PRIVACY) {
                 PrivacyScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.REWARDS) {
+                RewardsScreen(onBack = { navController.popBackStack() })
             }
         }
     }
