@@ -150,6 +150,12 @@ class AirportViewModel @Inject constructor(
                         airport.matches(route.origin.iata, route.origin.icao) -> FlightRole.DEPARTING
                         else -> return@mapNotNull null
                     }
+                    // adsbdb routes are scheduled and can be stale. Verify against the aircraft's
+                    // LIVE position — only label arriving/departing if it's actually flying that
+                    // route (rejects e.g. a plane parked at LGA whose route DB still says ORD->ALB).
+                    if (!RouteEstimator.isConsistent(route, ac.latitude, ac.longitude, ac.onGround, ac.altitudeFeet)) {
+                        return@mapNotNull null
+                    }
                     ac.id to AirportFlight(ac, role, route)
                 }
                 .toMap()
@@ -189,6 +195,9 @@ class AirportViewModel @Inject constructor(
         _selectedProgress.value = null
         viewModelScope.launch {
             val route = routeRepository.routeForCallsign(aircraft.callsign)
+                ?.takeIf {
+                    RouteEstimator.isConsistent(it, aircraft.latitude, aircraft.longitude, aircraft.onGround, aircraft.altitudeFeet)
+                }
             if (route != null && _selected.value?.id == aircraft.id) {
                 _selectedRoute.value = route
                 _selectedProgress.value = RouteEstimator.estimate(

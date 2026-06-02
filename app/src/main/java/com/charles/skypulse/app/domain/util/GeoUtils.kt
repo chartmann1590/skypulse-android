@@ -12,6 +12,7 @@ import kotlin.math.sqrt
 object GeoUtils {
 
     const val EARTH_RADIUS_KM = 6371.0088
+    const val EARTH_RADIUS_NM = EARTH_RADIUS_KM / 1.852
     const val KM_PER_NM = 1.852
     const val KM_PER_MILE = 1.609344
 
@@ -60,6 +61,33 @@ object GeoUtils {
             latMax = (lat + latDelta).coerceIn(-90.0, 90.0),
             lonMax = (lon + lonDelta).coerceIn(-180.0, 180.0),
         )
+    }
+
+    /**
+     * Signed cross-track distance (NM) of point 3 from the great-circle path from point 1 to
+     * point 2. |value| is how far the point lies off the direct route line.
+     */
+    fun crossTrackNm(
+        lat1: Double, lon1: Double,
+        lat2: Double, lon2: Double,
+        lat3: Double, lon3: Double,
+    ): Double {
+        val d13 = haversineNm(lat1, lon1, lat3, lon3) / EARTH_RADIUS_NM // angular (rad)
+        val b13 = Math.toRadians(bearingDegrees(lat1, lon1, lat3, lon3))
+        val b12 = Math.toRadians(bearingDegrees(lat1, lon1, lat2, lon2))
+        return asin(sin(d13) * sin(b13 - b12)) * EARTH_RADIUS_NM
+    }
+
+    /** Along-track distance (NM): how far along the 1->2 path the projection of point 3 lies. */
+    fun alongTrackNm(
+        lat1: Double, lon1: Double,
+        lat2: Double, lon2: Double,
+        lat3: Double, lon3: Double,
+    ): Double {
+        val d13 = haversineNm(lat1, lon1, lat3, lon3) / EARTH_RADIUS_NM
+        val dxt = crossTrackNm(lat1, lon1, lat2, lon2, lat3, lon3) / EARTH_RADIUS_NM
+        val ratio = (cos(d13) / cos(dxt)).coerceIn(-1.0, 1.0)
+        return kotlin.math.acos(ratio) * EARTH_RADIUS_NM
     }
 
     /** Compass abbreviation (N, NE, …) for a heading in degrees. */
