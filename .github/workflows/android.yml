@@ -2,12 +2,10 @@ name: Android CI
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
-  # Runs on every push and PR: unit tests + a debug build (uses AdMob *test* IDs).
+  # Gate: unit tests + a debug build (uses AdMob *test* IDs) before the signed release.
   build-and-test:
     runs-on: ubuntu-latest
 
