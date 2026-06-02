@@ -208,7 +208,12 @@ private fun RouteStrip(route: FlightRoute, progress: RouteProgress?) {
             progress != null -> "${progress.remainingNm.toInt()} NM to go (est.)"
             else -> "Estimated from live position"
         }
-        Text(etaText, style = SkyType.LabelSm, color = SkyColors.OnSurfaceVariant)
+        Text(etaText, style = SkyType.LabelSm, color = SkyColors.PrimaryFixedDim)
+        Text(
+            "Scheduled route via adsbdb — may differ from today's flight. ETA estimated from live position.",
+            style = SkyType.LabelSm,
+            color = SkyColors.Outline,
+        )
     }
 }
 
