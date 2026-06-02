@@ -91,6 +91,19 @@ class NearbyViewModel @Inject constructor(
                 delay(intervalMs)
             }
         }
+        // Keep the open detail sheet fresh (altitude/speed/last-seen) as the feed refreshes.
+        viewModelScope.launch {
+            aircraftRepository.feed.collect { feed ->
+                val current = _selected.value ?: return@collect
+                val fresh = feed.aircraft.firstOrNull {
+                    it.id == current.id || (current.hex != null && it.hex == current.hex)
+                } ?: return@collect
+                _selected.value = fresh
+                _selectedRoute.value?.let { r ->
+                    _selectedProgress.value = RouteEstimator.estimate(r, fresh.latitude, fresh.longitude, fresh.speedKnots)
+                }
+            }
+        }
     }
 
     private fun comparatorFor(sort: AircraftSort): Comparator<Aircraft> = when (sort) {

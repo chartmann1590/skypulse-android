@@ -24,6 +24,8 @@ data class Fr24Flight(
     val flightNumber: String?,
     val callsign: String?,
     val onGround: Boolean,
+    /** Epoch seconds of the last position report. */
+    val timestampSeconds: Long?,
 )
 
 /**
@@ -73,6 +75,7 @@ class Fr24FeedDataSource @Inject constructor(
             flightNumber = str(IDX_FLIGHT),
             callsign = str(IDX_CALLSIGN),
             onGround = (dbl(IDX_ONGROUND) ?: 0.0) >= 1.0,
+            timestampSeconds = dbl(IDX_TIMESTAMP)?.toLong(),
         )
     }
 
@@ -84,6 +87,7 @@ class Fr24FeedDataSource @Inject constructor(
         const val IDX_TRACK = 3
         const val IDX_ALT = 4
         const val IDX_SPD = 5
+        const val IDX_TIMESTAMP = 10
         const val IDX_TYPE = 8
         const val IDX_REG = 9
         const val IDX_ORIGIN = 11

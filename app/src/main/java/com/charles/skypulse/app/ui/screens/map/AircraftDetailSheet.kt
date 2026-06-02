@@ -210,7 +210,7 @@ private fun RouteStrip(route: FlightRoute, progress: RouteProgress?) {
         }
         Text(etaText, style = SkyType.LabelSm, color = SkyColors.PrimaryFixedDim)
         Text(
-            "Scheduled route via adsbdb — may differ from today's flight. ETA estimated from live position.",
+            "Route from live flight data (free sources) — arrival time is estimated from the current position.",
             style = SkyType.LabelSm,
             color = SkyColors.Outline,
         )

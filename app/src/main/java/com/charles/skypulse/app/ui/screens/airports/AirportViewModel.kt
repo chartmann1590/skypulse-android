@@ -166,7 +166,7 @@ class AirportViewModel @Inject constructor(
             headingDegrees = trackDeg,
             verticalRate = verticalRate,
             originCountry = null,
-            lastSeenEpochSeconds = null,
+            lastSeenEpochSeconds = timestampSeconds,
             source = DataSource.FR24,
             typeCode = aircraftType,
             onGround = onGround,
@@ -205,7 +205,10 @@ class AirportViewModel @Inject constructor(
         _selectedRoute.value = null
         _selectedProgress.value = null
         viewModelScope.launch {
-            val route = routeRepository.routeForAircraft(aircraft)
+            // Prefer the route already resolved for this flight on the airport board (FR24 may
+            // drop a flight's destination once it lands, so re-fetching can come back empty).
+            val known = _focusFlights.value.firstOrNull { it.aircraft.id == aircraft.id }?.route
+            val route = known ?: routeRepository.routeForAircraft(aircraft)
             if (route != null && _selected.value?.id == aircraft.id) {
                 _selectedRoute.value = route
                 _selectedProgress.value = RouteEstimator.estimate(

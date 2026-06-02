@@ -65,6 +65,23 @@ class HomeMapViewModel @Inject constructor(
 
     init {
         startRefreshLoop()
+        syncSelectionWithFeed()
+    }
+
+    /** Keep the open detail sheet's aircraft fresh (altitude/speed/last-seen) as the feed refreshes. */
+    private fun syncSelectionWithFeed() {
+        viewModelScope.launch {
+            aircraftRepository.feed.collect { feed ->
+                val current = _selected.value ?: return@collect
+                val fresh = feed.aircraft.firstOrNull {
+                    it.id == current.id || (current.hex != null && it.hex == current.hex)
+                } ?: return@collect
+                _selected.value = fresh
+                _selectedRoute.value?.let { r ->
+                    _selectedProgress.value = RouteEstimator.estimate(r, fresh.latitude, fresh.longitude, fresh.speedKnots)
+                }
+            }
+        }
     }
 
     private fun startRefreshLoop() {
