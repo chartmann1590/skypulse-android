@@ -66,16 +66,29 @@ jobs:
       - name: Bump versionCode and commit
         id: ver
         run: |
+          # Ignore file-mode changes (e.g. gradlew +x) so only the versionCode bump is committed
+          # and the working tree stays clean for rebasing.
+          git config core.fileMode false
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           CURRENT=$(grep -oP 'versionCode = \K[0-9]+' app/build.gradle.kts)
           NEXT=$((CURRENT + 1))
           sed -i "s/versionCode = ${CURRENT}/versionCode = ${NEXT}/" app/build.gradle.kts
           NAME=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
           echo "code=${NEXT}" >> "$GITHUB_OUTPUT"
           echo "name=${NAME}" >> "$GITHUB_OUTPUT"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -am "chore: bump versionCode to ${NEXT} [skip ci]"
-          git push
+          git commit -m "chore: bump versionCode to ${NEXT} [skip ci]" app/build.gradle.kts
+          # Tolerate concurrent pushes to main by rebasing and retrying.
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "push rejected (attempt ${attempt}); rebasing onto latest main..."
+            git pull --rebase origin main
+            sleep $((RANDOM % 4 + 2))
+          done
+          echo "Failed to push versionCode bump after 5 attempts" >&2
+          exit 1
 
       - name: Write local.properties from secrets (enables real ads)
         run: |
@@ -91,7 +104,7 @@ jobs:
           EOF
 
       - name: Decode release keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+        run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
 
       - name: Build signed release APK and AAB
         run: ./gradlew assembleRelease bundleRelease --stacktrace
