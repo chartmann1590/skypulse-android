@@ -36,8 +36,12 @@ object NetworkModule {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BASIC
         }
-        // Allow more concurrent requests per host so airport route lookups fan out quickly.
-        val dispatcher = okhttp3.Dispatcher().apply { maxRequestsPerHost = 12 }
+        // Allow many concurrent requests per host so airport route lookups (one per nearby
+        // aircraft) fan out quickly.
+        val dispatcher = okhttp3.Dispatcher().apply {
+            maxRequests = 64
+            maxRequestsPerHost = 32
+        }
         return OkHttpClient.Builder()
             .dispatcher(dispatcher)
             .connectTimeout(15, TimeUnit.SECONDS)

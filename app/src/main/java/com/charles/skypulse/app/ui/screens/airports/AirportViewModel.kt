@@ -133,28 +133,40 @@ class AirportViewModel @Inject constructor(
         val all = (result as? FetchResult.Success)?.aircraft.orEmpty()
             .sortedBy { it.distanceNm ?: Double.MAX_VALUE }
 
-        // Look up routes for the nearest flights that have a callsign (bounded).
-        val lookupTargets = all.filter { !it.callsign.isNullOrBlank() }.take(MAX_ROUTE_LOOKUPS)
-        val routeByCallsign: Map<String, FlightRoute> = coroutineScope {
-            lookupTargets.map { ac -> async { ac.callsign!!.trim() to routeRepository.routeForCallsign(ac.callsign) } }
+        // Check the route of EVERY nearby aircraft with a callsign (no altitude filter) so no
+        // arrival/departure is missed, whatever its altitude. Results are cached, so repeat
+        // opens are fast.
+        val lookupTargets = all
+            .filter { !it.callsign.isNullOrBlank() }
+            .take(MAX_ROUTE_LOOKUPS)
+
+        val routedById: Map<String, AirportFlight> = coroutineScope {
+            lookupTargets.map { ac -> async { ac to routeRepository.routeForCallsign(ac.callsign) } }
                 .awaitAll()
-                .mapNotNull { (cs, route) -> route?.let { cs.uppercase() to it } }
+                .mapNotNull { (ac, route) ->
+                    if (route == null) return@mapNotNull null
+                    val role = when {
+                        airport.matches(route.destination.iata, route.destination.icao) -> FlightRole.ARRIVING
+                        airport.matches(route.origin.iata, route.origin.icao) -> FlightRole.DEPARTING
+                        else -> return@mapNotNull null
+                    }
+                    ac.id to AirportFlight(ac, role, route)
+                }
                 .toMap()
         }
 
-        // Classify every nearby flight: arriving/departing if its route matches, else nearby.
-        return all.take(MAX_DISPLAY).map { ac ->
-            val route = ac.callsign?.trim()?.uppercase()?.let { routeByCallsign[it] }
-            val role = when {
-                route != null && airport.matches(route.destination.iata, route.destination.icao) -> FlightRole.ARRIVING
-                route != null && airport.matches(route.origin.iata, route.origin.icao) -> FlightRole.DEPARTING
-                else -> FlightRole.NEARBY
-            }
-            AirportFlight(ac, role, if (role == FlightRole.NEARBY) null else route)
-        }.sortedWith(
-            // Routed to/from first (ARRIVING, DEPARTING), then nearby; each by distance.
+        // Routed flights (to/from THIS airport) always show, regardless of distance rank.
+        val routed = routedById.values.sortedWith(
             compareBy({ it.role.ordinal }, { it.aircraft.distanceNm ?: Double.MAX_VALUE }),
         )
+        // Fill the rest with the nearest aircraft not already shown.
+        val nearby = all.asSequence()
+            .filter { it.id !in routedById }
+            .take((MAX_DISPLAY - routed.size).coerceAtLeast(MIN_NEARBY))
+            .map { AirportFlight(it, FlightRole.NEARBY, null) }
+            .toList()
+
+        return routed + nearby
     }
 
     private fun Airport.matches(iataCode: String?, icaoCode: String?): Boolean {
@@ -208,12 +220,13 @@ class AirportViewModel @Inject constructor(
     fun retryLoad() = loadNearbyAndFeatured()
 
     companion object {
-        /** Radius searched around an airport for inbound/outbound flights (NM). Wider so
-         *  arrivals still descending and departures climbing out are caught. */
-        private const val AIRPORT_RADIUS_NM = 175
-        /** Cap on parallel route lookups per airport to bound network calls. */
-        private const val MAX_ROUTE_LOOKUPS = 60
+        /** Radius searched around an airport for inbound/outbound flights (NM). */
+        private const val AIRPORT_RADIUS_NM = 250
+        /** Upper bound on parallel route lookups (effectively "all" in normal airspace). */
+        private const val MAX_ROUTE_LOOKUPS = 300
         /** Max flights shown in the sheet. */
-        private const val MAX_DISPLAY = 60
+        private const val MAX_DISPLAY = 200
+        /** Always show at least this many nearby flights as context. */
+        private const val MIN_NEARBY = 15
     }
 }
