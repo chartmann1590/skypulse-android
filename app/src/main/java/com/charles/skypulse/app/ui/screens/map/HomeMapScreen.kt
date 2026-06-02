@@ -41,6 +41,7 @@ import com.charles.skypulse.app.ui.theme.glassPanel
 @Composable
 fun HomeMapScreen(
     onOpenSettings: () -> Unit,
+    onOpenSearch: () -> Unit,
     viewModel: HomeMapViewModel = hiltViewModel(),
 ) {
     val feed by viewModel.feed.collectAsStateWithLifecycle()
@@ -62,7 +63,7 @@ fun HomeMapScreen(
             recenterTrigger = recenterTrigger,
         )
 
-        // Floating search bar (decorative entry — search lives on Airports tab).
+        // Floating search bar — opens the Airports search.
         Row(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -71,6 +72,7 @@ fun HomeMapScreen(
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(50))
                 .glassPanel(RoundedCornerShape(50), fill = SkyColors.PitchBlack.copy(alpha = 0.6f))
+                .clickable { onOpenSearch() }
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),

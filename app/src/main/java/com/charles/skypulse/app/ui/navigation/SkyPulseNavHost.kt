@@ -76,7 +76,16 @@ fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
                 )
             }
             composable(Routes.MAP) {
-                HomeMapScreen(onOpenSettings = { navController.navigate(Routes.SETTINGS) })
+                HomeMapScreen(
+                    onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+                    onOpenSearch = {
+                        navController.navigate(Routes.AIRPORTS) {
+                            popUpTo(Routes.MAP) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                )
             }
             composable(Routes.NEARBY) { NearbyScreen() }
             composable(Routes.AIRPORTS) { AirportLookupScreen() }

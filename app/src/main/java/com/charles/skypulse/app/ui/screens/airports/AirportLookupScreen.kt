@@ -41,6 +41,7 @@ import com.charles.skypulse.app.domain.model.Airport
 import com.charles.skypulse.app.domain.util.FormatUtils
 import com.charles.skypulse.app.ui.components.AircraftListItem
 import com.charles.skypulse.app.ui.components.EmptyState
+import com.charles.skypulse.app.ui.components.LoadingState
 import com.charles.skypulse.app.ui.components.PrimaryButton
 import com.charles.skypulse.app.ui.screens.map.AircraftDetailSheet
 import com.charles.skypulse.app.ui.theme.SkyColors
@@ -52,7 +53,8 @@ fun AirportLookupScreen(viewModel: AirportViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val focus by viewModel.focusAirport.collectAsStateWithLifecycle()
-    val focusAircraft by viewModel.aircraftAtFocus.collectAsStateWithLifecycle()
+    val focusFlights by viewModel.focusFlights.collectAsStateWithLifecycle()
+    val focusLoading by viewModel.focusLoading.collectAsStateWithLifecycle()
     val selected by viewModel.selected.collectAsStateWithLifecycle()
     val selectedRoute by viewModel.selectedRoute.collectAsStateWithLifecycle()
     val selectedProgress by viewModel.selectedProgress.collectAsStateWithLifecycle()
@@ -158,24 +160,30 @@ fun AirportLookupScreen(viewModel: AirportViewModel = hiltViewModel()) {
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    "Aircraft near ${focus!!.code}",
+                    "Arrivals & departures · ${focus!!.code}",
                     style = SkyType.TitleMd,
                     color = SkyColors.TextHigh,
                 )
-                if (focusAircraft.isEmpty()) {
-                    EmptyState(
+                when {
+                    focusLoading -> LoadingState(message = "Finding arriving & departing flights…")
+                    focusFlights.isEmpty() -> EmptyState(
                         icon = Icons.Filled.FlightTakeoff,
-                        title = "No aircraft right now",
-                        subtitle = "Open ADS-B coverage varies. Try again shortly.",
+                        title = "No arrivals or departures right now",
+                        subtitle = "We only show flights routed to/from this airport. Free route data can be incomplete, and quiet airports may have none at the moment.",
                     )
-                } else {
-                    focusAircraft.take(20).forEach { ac ->
+                    else -> focusFlights.take(30).forEach { flight ->
+                        val subtitle = when (flight.role) {
+                            FlightRole.ARRIVING -> "Arriving · from ${flight.route.origin.code}"
+                            FlightRole.DEPARTING -> "Departing · to ${flight.route.destination.code}"
+                        }
                         AircraftListItem(
-                            aircraft = ac,
+                            aircraft = flight.aircraft,
                             distanceUnit = settings.distanceUnit,
                             altitudeUnit = settings.altitudeUnit,
                             speedUnit = settings.speedUnit,
-                            onClick = { viewModel.select(ac) },
+                            onClick = { viewModel.select(flight.aircraft) },
+                            subtitle = subtitle,
+                            accent = if (flight.role == FlightRole.ARRIVING) SkyColors.PrimaryFixedDim else SkyColors.Secondary,
                         )
                     }
                 }
@@ -245,7 +253,7 @@ private fun AirportRow(
         Text(airport.name, style = SkyType.BodyMd, color = SkyColors.OnSurface)
         airport.city?.let { Text(it, style = SkyType.LabelSm, color = SkyColors.OnSurfaceVariant) }
         PrimaryButton(
-            text = "View nearby aircraft",
+            text = "Arrivals & departures",
             onClick = { onViewAircraft(airport) },
             modifier = Modifier.fillMaxWidth(),
         )
