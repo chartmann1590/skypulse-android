@@ -19,6 +19,10 @@ local.properties
 *.jks
 *.keystore
 
+# Firebase config (contains the project API key) — injected from the
+# GOOGLE_SERVICES_JSON secret in CI; keep your local copy untracked.
+app/google-services.json
+
 # Logs
 *.log
 

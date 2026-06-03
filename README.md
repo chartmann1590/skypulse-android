@@ -113,10 +113,11 @@ your values (AdMob app/banner/interstitial/rewarded IDs, keystore path + passwor
 value is absent the build falls back to Google's official test IDs / an unsigned release.
 
 ### Firebase
-A working `app/google-services.json` is committed for the demo project
-(`skypulse-tracker-2026`). To use your own, create a Firebase Android app for
-`com.charles.skypulse.app`, download your `google-services.json`, and replace the file.
-Enable **Performance Monitoring** in the Firebase console.
+`app/google-services.json` is **git-ignored** (it contains the project API key) and injected at
+build time from the `GOOGLE_SERVICES_JSON` secret in CI. For local builds, place your own
+`google-services.json` (for a Firebase Android app with package `com.charles.skypulse.app`) in
+`app/` — see [`app/google-services.json.template`](app/google-services.json.template). Enable
+**Performance Monitoring** in the Firebase console.
 
 ### CI / Releases (GitHub Actions)
 [`.github/workflows/android.yml`](.github/workflows/android.yml):
@@ -125,6 +126,7 @@ Enable **Performance Monitoring** in the Firebase console.
   AAB using the real AdMob IDs, and publishes a **GitHub Release** with both attached.
 
 Required repository **secrets**: `ADMOB_APP_ID`, `ADMOB_BANNER_ID`, `ADMOB_INTERSTITIAL_ID`,
-`ADMOB_REWARDED_ID`, `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
+`ADMOB_REWARDED_ID`, `GOOGLE_SERVICES_JSON` (base64 of `google-services.json`), `KEYSTORE_BASE64`,
+`KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
 
 </details>
