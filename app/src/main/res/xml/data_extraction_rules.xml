@@ -1,11 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Backups are disabled (android:allowBackup="false"), but these rules are declared so that,
+  even if a backup/transfer path is ever enabled, no on-device data leaves the device.
+  Each <exclude> requires a `domain`; excluding every domain opts everything out.
+-->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- Exclude all files from cloud backup to mimic allowBackup="false" -->
-        <exclude path="." />
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
     </cloud-backup>
     <device-transfer>
-        <!-- Exclude all files from device-to-device transfer -->
-        <exclude path="." />
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
     </device-transfer>
 </data-extraction-rules>

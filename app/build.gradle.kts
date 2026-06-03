@@ -106,6 +106,10 @@ android {
         sarifReport = true
         // Don't fail the build on lint findings; they surface in the Security tab instead.
         abortOnError = false
+        // "Update available" checks are owned by Dependabot, not lint — silence the nags.
+        disable.add("GradleDependency")
+        disable.add("AndroidGradlePluginVersion")
+        disable.add("NewerVersionAvailable")
     }
     packaging {
         resources {

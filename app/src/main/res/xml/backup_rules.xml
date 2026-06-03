@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Full-backup rules for Android 11 and below (complements data_extraction_rules.xml for 12+).
+  Backups are disabled (android:allowBackup="false"); excluding every domain ensures no
+  on-device data is ever included even if backup is later enabled.
+-->
+<full-backup-content>
+    <exclude domain="root" />
+    <exclude domain="file" />
+    <exclude domain="database" />
+    <exclude domain="sharedpref" />
+    <exclude domain="external" />
+</full-backup-content>
