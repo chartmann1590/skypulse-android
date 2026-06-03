@@ -20,9 +20,9 @@ import com.charles.skypulse.app.ui.theme.SkyType
 /** Centered SkyPulse wordmark with an optional settings action (matches the design). */
 @Composable
 fun SkyTopAppBar(
+    modifier: Modifier = Modifier,
     title: String = "SkyPulse",
     onSettings: (() -> Unit)? = null,
-    modifier: Modifier = Modifier,
 ) {
     Box(
         modifier = modifier

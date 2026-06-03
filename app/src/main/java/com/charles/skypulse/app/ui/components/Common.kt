@@ -134,9 +134,9 @@ fun GhostButton(
 @Composable
 fun StatusBadge(
     text: String,
+    modifier: Modifier = Modifier,
     dotColor: Color = SkyColors.PrimaryFixedDim,
     textColor: Color = SkyColors.PrimaryFixedDim,
-    modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(50)
     Row(
@@ -196,8 +196,8 @@ fun EmptyState(
 @Composable
 fun ErrorState(
     message: String,
-    onRetry: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
+    onRetry: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier.fillMaxWidth().padding(32.dp),

@@ -1,16 +1,14 @@
 package com.charles.skypulse.app.di
 
+import android.content.Context
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.ktx.messaging
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
-import com.google.firebase.remoteconfig.ktx.remoteConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -19,14 +17,15 @@ import javax.inject.Singleton
 object FirebaseModule {
 
     @Provides @Singleton
-    fun provideAnalytics(): FirebaseAnalytics = Firebase.analytics
+    fun provideAnalytics(@ApplicationContext context: Context): FirebaseAnalytics =
+        FirebaseAnalytics.getInstance(context)
 
     @Provides @Singleton
     fun provideCrashlytics(): FirebaseCrashlytics = FirebaseCrashlytics.getInstance()
 
     @Provides @Singleton
-    fun provideRemoteConfig(): FirebaseRemoteConfig = Firebase.remoteConfig
+    fun provideRemoteConfig(): FirebaseRemoteConfig = FirebaseRemoteConfig.getInstance()
 
     @Provides @Singleton
-    fun provideMessaging(): FirebaseMessaging = Firebase.messaging
+    fun provideMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
 }
