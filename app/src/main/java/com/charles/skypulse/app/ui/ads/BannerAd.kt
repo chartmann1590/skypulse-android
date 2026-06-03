@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.viewinterop.AndroidView
 import com.charles.skypulse.app.data.ads.AdConfig
@@ -25,7 +24,6 @@ fun BannerAd(
     // Don't try to inflate an AdView in Compose previews.
     if (LocalInspectionMode.current) return
 
-    val context = LocalContext.current
     AndroidView(
         modifier = modifier.fillMaxWidth(),
         factory = { ctx ->
@@ -41,5 +39,6 @@ fun BannerAd(
 private fun adaptiveBannerSize(context: Context): AdSize {
     val metrics = context.resources.displayMetrics
     val adWidthDp = (metrics.widthPixels / metrics.density).toInt()
-    return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(context, adWidthDp)
+    // SDK 25 replacement for the deprecated getCurrentOrientationAnchoredAdaptiveBannerAdSize.
+    return AdSize.getLargeAnchoredAdaptiveBannerAdSize(context, adWidthDp)
 }

@@ -28,8 +28,9 @@ class SkyPulseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        // No backend to register with on Spark; record for diagnostics only.
-        Log.i(TAG, "New FCM token: ${token.take(12)}…")
+        // No backend to register with on Spark; record only a non-sensitive flag for diagnostics.
+        // The token itself is never logged.
+        Log.i(TAG, "Received a new FCM registration token")
         FirebaseCrashlytics.getInstance().setCustomKey("has_fcm_token", true)
     }
 

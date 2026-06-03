@@ -1,4 +1,6 @@
 name: "CodeQL custom configuration"
+# Exclude Gradle internals and generated build output (e.g. KSP/Room generated code) from analysis.
 paths-ignore:
   - '.gradle'
   - '**/build'
+  - '**/build/**'
