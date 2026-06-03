@@ -105,6 +105,12 @@ android {
         compose = true
         buildConfig = true
     }
+    lint {
+        // Emit SARIF so CI can upload Lint findings to GitHub code scanning.
+        sarifReport = true
+        // Don't fail the build on lint findings; they surface in the Security tab instead.
+        abortOnError = false
+    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"

@@ -8,6 +8,9 @@ jobs:
   # Gate: unit tests + a debug build (uses AdMob *test* IDs) before the signed release.
   build-and-test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write   # upload Lint SARIF to code scanning
 
     steps:
       - name: Checkout
@@ -40,6 +43,16 @@ jobs:
           name: skypulse-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
+
+      - name: Android Lint
+        run: ./gradlew lintDebug --stacktrace
+
+      - name: Upload Lint results to code scanning
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: app/build/reports/lint-results-debug.sarif
+          category: android-lint
 
   # Runs only on pushes to main: bump versionCode, build a SIGNED release APK + AAB with the
   # real AdMob IDs (from secrets), and publish a GitHub Release.
