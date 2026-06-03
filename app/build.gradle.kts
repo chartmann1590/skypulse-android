@@ -36,12 +36,12 @@ val admobRewardedId = secret("ADMOB_REWARDED_ID", testRewardedId)
 
 android {
     namespace = "com.charles.skypulse.app"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.charles.skypulse.app"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 6
         versionName = "1.0.0"
 
@@ -176,4 +176,10 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.junit)
+}
+
+configurations.all {
+    resolutionStrategy {
+        force("org.jetbrains.kotlin:kotlin-metadata-jvm:2.4.0")
+    }
 }
