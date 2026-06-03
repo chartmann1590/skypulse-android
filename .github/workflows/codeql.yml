@@ -19,14 +19,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Write google-services.json from secret
+        run: |
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            printf '%s' "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
+          else
+            cp app/google-services.json.template app/google-services.json
+          fi
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: java-kotlin
-          # Source-only analysis — no Gradle build, Android SDK, or secrets required.
-          build-mode: none
+          # Manual build: CodeQL traces the Kotlin/Java compile (build-mode "none" can't process
+          # this project's Kotlin). Requires Kotlin < 2.3.30 — pinned to 2.3.21 in libs.versions.toml.
+          build-mode: manual
           config-file: .github/codeql-config.yml
           queries: security-and-quality
+
+      - name: Build project (traced by CodeQL)
+        run: ./gradlew :app:assembleDebug --no-daemon
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
