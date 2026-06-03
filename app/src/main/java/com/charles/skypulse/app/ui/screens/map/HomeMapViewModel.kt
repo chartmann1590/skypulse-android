@@ -9,17 +9,22 @@ import com.charles.skypulse.app.data.repository.AircraftFeedState
 import com.charles.skypulse.app.data.repository.AircraftRepository
 import com.charles.skypulse.app.data.repository.RouteRepository
 import com.charles.skypulse.app.data.repository.SavedRepository
+import com.charles.skypulse.app.data.repository.ShareRepository
 import com.charles.skypulse.app.data.settings.SettingsDataStore
 import com.charles.skypulse.app.data.settings.SkySettings
 import com.charles.skypulse.app.domain.model.Aircraft
 import com.charles.skypulse.app.domain.model.FlightRoute
 import com.charles.skypulse.app.domain.model.RouteProgress
+import com.charles.skypulse.app.domain.model.SharedFlight
 import com.charles.skypulse.app.domain.util.RouteEstimator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -29,12 +34,19 @@ import javax.inject.Inject
 
 data class UserLocation(val lat: Double, val lon: Double, val isReal: Boolean)
 
+/** One-shot results from sharing a flight, surfaced to the screen to launch the share sheet. */
+sealed interface ShareEvent {
+    data class Ready(val url: String) : ShareEvent
+    data class Failed(val message: String) : ShareEvent
+}
+
 @HiltViewModel
 class HomeMapViewModel @Inject constructor(
     private val aircraftRepository: AircraftRepository,
     private val locationProvider: LocationProvider,
     private val savedRepository: SavedRepository,
     private val routeRepository: RouteRepository,
+    private val shareRepository: ShareRepository,
     private val analytics: Analytics,
     private val remoteConfig: RemoteConfigProvider,
     settingsDataStore: SettingsDataStore,
@@ -60,6 +72,16 @@ class HomeMapViewModel @Inject constructor(
 
     private val _selectedProgress = MutableStateFlow<RouteProgress?>(null)
     val selectedProgress: StateFlow<RouteProgress?> = _selectedProgress.asStateFlow()
+
+    /** A flight opened from a share link — drawn + centered on the map even if it's not in the feed. */
+    private val _focusShared = MutableStateFlow<Aircraft?>(null)
+    val focusShared: StateFlow<Aircraft?> = _focusShared.asStateFlow()
+
+    private val _isSharing = MutableStateFlow(false)
+    val isSharing: StateFlow<Boolean> = _isSharing.asStateFlow()
+
+    private val _shareEvents = MutableSharedFlow<ShareEvent>(extraBufferCapacity = 1)
+    val shareEvents: SharedFlow<ShareEvent> = _shareEvents.asSharedFlow()
 
     private val radiusNm: Int get() = remoteConfig.defaultRadiusNm.coerceIn(10, 250)
 
@@ -141,6 +163,46 @@ class HomeMapViewModel @Inject constructor(
         viewModelScope.launch {
             val saved = savedRepository.isAircraftSaved(ac.id).first()
             savedRepository.toggleAircraft(ac, saved)
+        }
+    }
+
+    /** Publish the selected flight to Firestore and emit a shareable link for the OS share sheet. */
+    fun shareSelected() {
+        val ac = _selected.value ?: return
+        if (_isSharing.value) return
+        if (ac.latitude == null || ac.longitude == null) {
+            _shareEvents.tryEmit(ShareEvent.Failed("This flight has no position to share yet."))
+            return
+        }
+        _isSharing.value = true
+        viewModelScope.launch {
+            try {
+                val url = shareRepository.shareFlight(
+                    SharedFlight(ac, _selectedRoute.value, _selectedProgress.value),
+                )
+                analytics.logFlightShared(ac.source.name)
+                _shareEvents.tryEmit(ShareEvent.Ready(url))
+            } catch (e: Exception) {
+                _shareEvents.tryEmit(ShareEvent.Failed("Couldn't create a share link. Check your connection and try again."))
+            } finally {
+                _isSharing.value = false
+            }
+        }
+    }
+
+    /** Open a flight that someone shared (from a deep link): show its details and center the map. */
+    fun openSharedFlight(shareId: String) {
+        viewModelScope.launch {
+            val shared = try {
+                shareRepository.loadSharedFlight(shareId)
+            } catch (e: Exception) {
+                null
+            } ?: return@launch
+            analytics.logSharedFlightOpened()
+            _selected.value = shared.aircraft
+            _selectedRoute.value = shared.route
+            _selectedProgress.value = shared.progress
+            _focusShared.value = shared.aircraft
         }
     }
 }

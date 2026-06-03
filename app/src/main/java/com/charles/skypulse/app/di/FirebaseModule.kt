@@ -2,7 +2,9 @@ package com.charles.skypulse.app.di
 
 import android.content.Context
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import dagger.Module
@@ -28,4 +30,10 @@ object FirebaseModule {
 
     @Provides @Singleton
     fun provideMessaging(): FirebaseMessaging = FirebaseMessaging.getInstance()
+
+    @Provides @Singleton
+    fun provideFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    @Provides @Singleton
+    fun provideAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 }

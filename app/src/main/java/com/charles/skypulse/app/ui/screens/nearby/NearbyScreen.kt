@@ -10,12 +10,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
@@ -28,6 +32,7 @@ import com.charles.skypulse.app.ui.components.LoadingState
 import com.charles.skypulse.app.ui.components.PillChip
 import com.charles.skypulse.app.ui.components.SkyTopAppBar
 import com.charles.skypulse.app.ui.screens.map.AircraftDetailSheet
+import com.charles.skypulse.app.ui.screens.map.ShareEvent
 import com.charles.skypulse.app.ui.theme.SkyColors
 import com.charles.skypulse.app.ui.theme.SkyType
 
@@ -39,6 +44,28 @@ fun NearbyScreen(viewModel: NearbyViewModel = hiltViewModel()) {
     val selected by viewModel.selected.collectAsStateWithLifecycle()
     val selectedRoute by viewModel.selectedRoute.collectAsStateWithLifecycle()
     val selectedProgress by viewModel.selectedProgress.collectAsStateWithLifecycle()
+    val isSharing by viewModel.isSharing.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.shareEvents.collect { event ->
+            when (event) {
+                is ShareEvent.Ready -> {
+                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, event.url)
+                    }
+                    context.startActivity(
+                        Intent.createChooser(sendIntent, "Share flight").apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        },
+                    )
+                }
+                is ShareEvent.Failed ->
+                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         SkyTopAppBar()
@@ -109,6 +136,8 @@ fun NearbyScreen(viewModel: NearbyViewModel = hiltViewModel()) {
             onSave = viewModel::toggleSaveSelected,
             route = selectedRoute,
             progress = selectedProgress,
+            onShare = viewModel::shareSelected,
+            isSharing = isSharing,
         )
     }
 }

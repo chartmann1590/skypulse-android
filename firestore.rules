@@ -1,0 +1,36 @@
+rules_version = '2';
+
+// SkyPulse — "Share a flight" backend.
+//
+// The app writes a one-off snapshot of a flight to `shared_flights/{shareId}` after signing
+// in anonymously. The public website (GitHub Pages) reads that snapshot to render a shareable
+// flight page. Snapshots are immutable and public-readable; only signed-in (anonymous counts)
+// clients may create them, and only with a well-formed, size-bounded payload.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /shared_flights/{shareId} {
+      // Anyone with the link can view a shared flight.
+      allow read: if true;
+
+      // Only an authenticated (anonymous) app client can create a share, and the payload must
+      // be well-formed: a server-stamped createdAt, valid coordinates, and a bounded field count
+      // so the collection can't be abused as arbitrary storage.
+      allow create: if request.auth != null
+        && request.resource.data.size() <= 40
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.lat is number
+        && request.resource.data.lon is number
+        && request.resource.data.lat >= -90 && request.resource.data.lat <= 90
+        && request.resource.data.lon >= -180 && request.resource.data.lon <= 180;
+
+      // Shares are immutable once created.
+      allow update, delete: if false;
+    }
+
+    // Everything else is locked down.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

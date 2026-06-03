@@ -33,7 +33,10 @@ import com.charles.skypulse.app.ui.screens.splash.SplashScreen
 private val NO_BANNER_ROUTES = setOf(Routes.SPLASH, Routes.ONBOARDING)
 
 @Composable
-fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
+fun SkyPulseNavHost(
+    sharedFlightId: String? = null,
+    appViewModel: AppViewModel = hiltViewModel(),
+) {
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -82,7 +85,8 @@ fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
                 SplashScreen(
                     onFinished = {
                         val onboarded = appViewModel.onboarded.value == true
-                        val target = if (onboarded) Routes.MAP else Routes.ONBOARDING
+                        // A shared-flight deep link always lands on the map.
+                        val target = if (onboarded || sharedFlightId != null) Routes.MAP else Routes.ONBOARDING
                         navController.navigate(target) {
                             popUpTo(Routes.SPLASH) { inclusive = true }
                         }
@@ -110,6 +114,7 @@ fun SkyPulseNavHost(appViewModel: AppViewModel = hiltViewModel()) {
                             restoreState = true
                         }
                     },
+                    sharedFlightId = sharedFlightId,
                 )
 
                 // First-open explanation of the ad-free rewards system.

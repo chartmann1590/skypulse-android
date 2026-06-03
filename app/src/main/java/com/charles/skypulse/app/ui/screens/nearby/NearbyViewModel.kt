@@ -2,23 +2,30 @@ package com.charles.skypulse.app.ui.screens.nearby
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.charles.skypulse.app.data.firebase.Analytics
 import com.charles.skypulse.app.data.location.LocationProvider
 import com.charles.skypulse.app.data.repository.AircraftRepository
 import com.charles.skypulse.app.data.repository.RouteRepository
 import com.charles.skypulse.app.data.repository.SavedRepository
+import com.charles.skypulse.app.data.repository.ShareRepository
 import com.charles.skypulse.app.data.settings.SettingsDataStore
 import com.charles.skypulse.app.data.settings.SkySettings
 import com.charles.skypulse.app.domain.model.Aircraft
 import com.charles.skypulse.app.domain.model.AircraftSort
 import com.charles.skypulse.app.domain.model.FlightRoute
 import com.charles.skypulse.app.domain.model.RouteProgress
+import com.charles.skypulse.app.domain.model.SharedFlight
 import com.charles.skypulse.app.domain.util.GeoUtils
 import com.charles.skypulse.app.domain.util.RouteEstimator
+import com.charles.skypulse.app.ui.screens.map.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -40,8 +47,16 @@ class NearbyViewModel @Inject constructor(
     private val locationProvider: LocationProvider,
     private val savedRepository: SavedRepository,
     private val routeRepository: RouteRepository,
+    private val shareRepository: ShareRepository,
+    private val analytics: Analytics,
     settingsDataStore: SettingsDataStore,
 ) : ViewModel() {
+
+    private val _isSharing = MutableStateFlow(false)
+    val isSharing: StateFlow<Boolean> = _isSharing.asStateFlow()
+
+    private val _shareEvents = MutableSharedFlow<ShareEvent>(extraBufferCapacity = 1)
+    val shareEvents: SharedFlow<ShareEvent> = _shareEvents.asSharedFlow()
 
     private val _sort = MutableStateFlow(AircraftSort.CLOSEST)
     val sort: StateFlow<AircraftSort> = _sort.asStateFlow()
@@ -141,6 +156,30 @@ class NearbyViewModel @Inject constructor(
         viewModelScope.launch {
             val saved = savedRepository.isAircraftSaved(ac.id).first()
             savedRepository.toggleAircraft(ac, saved)
+        }
+    }
+
+    /** Publish the selected flight to Firestore and emit a shareable link for the OS share sheet. */
+    fun shareSelected() {
+        val ac = _selected.value ?: return
+        if (_isSharing.value) return
+        if (ac.latitude == null || ac.longitude == null) {
+            _shareEvents.tryEmit(ShareEvent.Failed("This flight has no position to share yet."))
+            return
+        }
+        _isSharing.value = true
+        viewModelScope.launch {
+            try {
+                val url = shareRepository.shareFlight(
+                    SharedFlight(ac, _selectedRoute.value, _selectedProgress.value),
+                )
+                analytics.logFlightShared(ac.source.name)
+                _shareEvents.tryEmit(ShareEvent.Ready(url))
+            } catch (e: Exception) {
+                _shareEvents.tryEmit(ShareEvent.Failed("Couldn't create a share link. Check your connection and try again."))
+            } finally {
+                _isSharing.value = false
+            }
         }
     }
 }

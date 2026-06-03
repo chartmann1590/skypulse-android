@@ -2,6 +2,7 @@ package com.charles.skypulse.app.ui.screens.airports
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.charles.skypulse.app.data.firebase.Analytics
 import com.charles.skypulse.app.data.location.LocationProvider
 import com.charles.skypulse.app.data.remote.Fr24FeedDataSource
 import com.charles.skypulse.app.data.remote.Fr24Flight
@@ -9,6 +10,7 @@ import com.charles.skypulse.app.data.remote.RemoteAircraftDataSource
 import com.charles.skypulse.app.data.repository.AirportRepository
 import com.charles.skypulse.app.data.repository.RouteRepository
 import com.charles.skypulse.app.data.repository.SavedRepository
+import com.charles.skypulse.app.data.repository.ShareRepository
 import com.charles.skypulse.app.data.settings.SettingsDataStore
 import com.charles.skypulse.app.data.settings.SkySettings
 import com.charles.skypulse.app.domain.model.Aircraft
@@ -16,13 +18,18 @@ import com.charles.skypulse.app.domain.model.Airport
 import com.charles.skypulse.app.domain.model.DataSource
 import com.charles.skypulse.app.domain.model.FlightRoute
 import com.charles.skypulse.app.domain.model.RouteProgress
+import com.charles.skypulse.app.domain.model.SharedFlight
 import com.charles.skypulse.app.domain.util.FetchResult
 import com.charles.skypulse.app.domain.util.GeoUtils
 import com.charles.skypulse.app.domain.util.RouteEstimator
+import com.charles.skypulse.app.ui.screens.map.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
@@ -55,11 +62,19 @@ class AirportViewModel @Inject constructor(
     private val savedRepository: SavedRepository,
     private val routeRepository: RouteRepository,
     private val locationProvider: LocationProvider,
+    private val shareRepository: ShareRepository,
+    private val analytics: Analytics,
     settingsDataStore: SettingsDataStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AirportsUiState())
     val state: StateFlow<AirportsUiState> = _state.asStateFlow()
+
+    private val _isSharing = MutableStateFlow(false)
+    val isSharing: StateFlow<Boolean> = _isSharing.asStateFlow()
+
+    private val _shareEvents = MutableSharedFlow<ShareEvent>(extraBufferCapacity = 1)
+    val shareEvents: SharedFlow<ShareEvent> = _shareEvents.asSharedFlow()
 
     private val _focusAirport = MutableStateFlow<Airport?>(null)
     val focusAirport: StateFlow<Airport?> = _focusAirport.asStateFlow()
@@ -229,6 +244,30 @@ class AirportViewModel @Inject constructor(
         viewModelScope.launch {
             val saved = savedRepository.isAircraftSaved(ac.id).first()
             savedRepository.toggleAircraft(ac, saved)
+        }
+    }
+
+    /** Publish the selected flight to Firestore and emit a shareable link for the OS share sheet. */
+    fun shareSelected() {
+        val ac = _selected.value ?: return
+        if (_isSharing.value) return
+        if (ac.latitude == null || ac.longitude == null) {
+            _shareEvents.tryEmit(ShareEvent.Failed("This flight has no position to share yet."))
+            return
+        }
+        _isSharing.value = true
+        viewModelScope.launch {
+            try {
+                val url = shareRepository.shareFlight(
+                    SharedFlight(ac, _selectedRoute.value, _selectedProgress.value),
+                )
+                analytics.logFlightShared(ac.source.name)
+                _shareEvents.tryEmit(ShareEvent.Ready(url))
+            } catch (e: Exception) {
+                _shareEvents.tryEmit(ShareEvent.Failed("Couldn't create a share link. Check your connection and try again."))
+            } finally {
+                _isSharing.value = false
+            }
         }
     }
 

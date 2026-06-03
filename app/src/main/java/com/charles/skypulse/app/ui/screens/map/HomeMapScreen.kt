@@ -18,14 +18,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,6 +48,7 @@ fun HomeMapScreen(
     onOpenSettings: () -> Unit,
     onOpenSearch: () -> Unit,
     onOpenRewards: () -> Unit,
+    sharedFlightId: String? = null,
     viewModel: HomeMapViewModel = hiltViewModel(),
 ) {
     val feed by viewModel.feed.collectAsStateWithLifecycle()
@@ -53,6 +58,37 @@ fun HomeMapScreen(
     val selectedRoute by viewModel.selectedRoute.collectAsStateWithLifecycle()
     val selectedProgress by viewModel.selectedProgress.collectAsStateWithLifecycle()
     val recenterTrigger by viewModel.recenterTrigger.collectAsStateWithLifecycle()
+    val focusShared by viewModel.focusShared.collectAsStateWithLifecycle()
+    val isSharing by viewModel.isSharing.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    // Open a shared flight when arriving via deep link.
+    LaunchedEffect(sharedFlightId) {
+        if (!sharedFlightId.isNullOrBlank()) {
+            viewModel.openSharedFlight(sharedFlightId)
+        }
+    }
+
+    // React to share-link generation: launch the Android share sheet or show an error.
+    LaunchedEffect(Unit) {
+        viewModel.shareEvents.collect { event ->
+            when (event) {
+                is ShareEvent.Ready -> {
+                    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, event.url)
+                    }
+                    context.startActivity(
+                        Intent.createChooser(sendIntent, "Share flight").apply {
+                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        },
+                    )
+                }
+                is ShareEvent.Failed ->
+                    Toast.makeText(context, event.message, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(SkyColors.PitchBlack)) {
         OsmMapView(
@@ -63,6 +99,7 @@ fun HomeMapScreen(
             onAircraftClick = viewModel::select,
             modifier = Modifier.fillMaxSize(),
             recenterTrigger = recenterTrigger,
+            focusAircraft = focusShared,
         )
 
         // Floating search bar — opens the Airports search.
@@ -126,6 +163,8 @@ fun HomeMapScreen(
             onSave = viewModel::toggleSaveSelected,
             route = selectedRoute,
             progress = selectedProgress,
+            onShare = viewModel::shareSelected,
+            isSharing = isSharing,
         )
     }
 }

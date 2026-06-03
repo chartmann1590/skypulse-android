@@ -22,6 +22,11 @@ class Analytics @Inject constructor(
     fun logAircraftTapped(source: String) =
         log("aircraft_tapped", "source" to source)
 
+    fun logFlightShared(source: String) =
+        log("flight_shared", "source" to source)
+
+    fun logSharedFlightOpened() = log("shared_flight_opened")
+
     fun logAlertCreated(type: String) =
         log("alert_created", "type" to type)
 

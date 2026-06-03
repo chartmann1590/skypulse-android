@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Radar
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SwapVert
@@ -57,8 +58,10 @@ fun AircraftDetailSheet(
     speedUnit: SpeedUnit,
     onDismiss: () -> Unit,
     onSave: () -> Unit,
+    onShare: () -> Unit,
     route: FlightRoute? = null,
     progress: RouteProgress? = null,
+    isSharing: Boolean = false,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
@@ -142,13 +145,21 @@ fun AircraftDetailSheet(
                     leadingIcon = Icons.Filled.Star,
                     modifier = Modifier.weight(1f),
                 )
-                PrimaryButton(
+                GhostButton(
                     text = "Notify",
                     onClick = onSave,
                     leadingIcon = Icons.Filled.NotificationsActive,
                     modifier = Modifier.weight(1f),
                 )
             }
+
+            // Share a live link to this flight that friends can open on the web — or in the app.
+            PrimaryButton(
+                text = if (isSharing) "Generating link…" else "Share flight",
+                onClick = { if (!isSharing) onShare() },
+                leadingIcon = Icons.Filled.Share,
+                modifier = Modifier.fillMaxWidth(),
+            )
         }
     }
 }

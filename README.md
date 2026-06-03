@@ -33,6 +33,8 @@ No account. No sign-up. No API key. Just open it and look up.
 - 🔔 **Local alerts** — get a notification when a plane enters your area, a specific
   callsign shows up, or a low flight passes nearby. All handled on your device.
 - 🔖 **Save** your favorite aircraft, airports, and areas.
+- 🔗 **Share a flight** — tap **Share** on any flight to send a friend a link. They see its
+  live position, route, and details right in the browser, and can open it straight in the app.
 
 ## Free, with optional ads — and a way to turn them off
 
@@ -64,6 +66,11 @@ AdMob and collects anonymous diagnostics to stay reliable — full details are i
 **Privacy** screen and the
 [Privacy Policy](https://chartmann1590.github.io/skypulse-android/privacy.html).
 
+When you **share a flight**, only that flight's public ADS-B details (callsign, position,
+route, altitude, etc.) are uploaded to create the shareable link — never your location or any
+personal data. Sharing signs you in anonymously to Firebase (no email, no profile) and each
+shared snapshot is public-readable by anyone with the link.
+
 ## Support
 
 If SkyPulse is useful to you, you can support development here:
@@ -87,7 +94,8 @@ This project is for educational/enthusiast use. Please respect each data provide
 ### Tech stack
 Kotlin · Jetpack Compose · Material 3 · MVVM · Hilt · Coroutines/Flow · Retrofit +
 kotlinx.serialization · Room · DataStore · WorkManager · osmdroid · Firebase (Spark tier:
-Analytics, Crashlytics, Performance Monitoring, Remote Config, FCM) · Google AdMob + UMP.
+Analytics, Crashlytics, Performance Monitoring, Remote Config, FCM, Firestore + Anonymous
+Auth for flight sharing) · Google AdMob + UMP.
 
 ```
 com.charles.skypulse.app
@@ -118,6 +126,15 @@ build time from the `GOOGLE_SERVICES_JSON` secret in CI. For local builds, place
 `google-services.json` (for a Firebase Android app with package `com.charles.skypulse.app`) in
 `app/` — see [`app/google-services.json.template`](app/google-services.json.template). Enable
 **Performance Monitoring** in the Firebase console.
+
+**Flight sharing (Firestore + Anonymous Auth).** Sharing writes an immutable, public-readable
+snapshot to the `shared_flights` collection and returns a link to the web viewer
+([`docs/flight.html`](docs/flight.html), served from GitHub Pages). Security rules live in
+[`firestore.rules`](firestore.rules) (public read; create requires an anonymous sign-in and
+validates the payload; no updates/deletes) and deploy with `firebase deploy --only firestore:rules`.
+Enable **Anonymous Authentication** and create a **Cloud Firestore** database (Native mode) in
+the console — both stay within the free **Spark** tier. The web viewer reads documents directly
+via the Firestore REST API (no SDK, no auth needed for public reads).
 
 ### CI / Releases (GitHub Actions)
 [`.github/workflows/android.yml`](.github/workflows/android.yml):

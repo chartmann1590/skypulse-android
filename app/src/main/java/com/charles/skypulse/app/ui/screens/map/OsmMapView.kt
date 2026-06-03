@@ -26,6 +26,7 @@ fun OsmMapView(
     onAircraftClick: (Aircraft) -> Unit,
     modifier: Modifier = Modifier,
     recenterTrigger: Int = 0,
+    focusAircraft: Aircraft? = null,
 ) {
     val context = LocalContext.current
     val mapView = remember {
@@ -40,6 +41,7 @@ fun OsmMapView(
     // Mutable holders that don't trigger recomposition.
     val hasCentered = remember { booleanArrayOf(false) }
     val lastRecenter = remember { intArrayOf(-1) }
+    val lastFocusId = remember { arrayOfNulls<String>(1) }
 
     AndroidView(
         factory = { mapView },
@@ -58,6 +60,17 @@ fun OsmMapView(
                     map.controller.animateTo(GeoPoint(userLat, userLon))
                     map.controller.setZoom(10.0)
                 }
+            }
+
+            // Center on a focused (shared) aircraft when it first arrives.
+            if (focusAircraft != null &&
+                focusAircraft.latitude != null && focusAircraft.longitude != null &&
+                focusAircraft.id != lastFocusId[0]
+            ) {
+                lastFocusId[0] = focusAircraft.id
+                map.controller.animateTo(GeoPoint(focusAircraft.latitude, focusAircraft.longitude))
+                map.controller.setZoom(10.0)
+                hasCentered[0] = true
             }
 
             map.overlays.clear()
@@ -91,6 +104,25 @@ fun OsmMapView(
                     }
                     map.overlays.add(marker)
                 }
+
+            // Highlighted marker for a shared flight (may not be in the live feed).
+            if (focusAircraft != null &&
+                focusAircraft.latitude != null && focusAircraft.longitude != null &&
+                aircraft.none { it.id == focusAircraft.id }
+            ) {
+                Marker(map).apply {
+                    position = GeoPoint(focusAircraft.latitude, focusAircraft.longitude)
+                    setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                    rotation = -(focusAircraft.headingDegrees?.toFloat() ?: 0f)
+                    title = focusAircraft.displayName
+                    icon = ContextCompat.getDrawable(context, R.drawable.ic_map_plane)
+                    isFlat = true
+                    setOnMarkerClickListener { _, _ ->
+                        onAircraftClick(focusAircraft)
+                        true
+                    }
+                }.also { map.overlays.add(it) }
+            }
 
             map.invalidate()
         },
