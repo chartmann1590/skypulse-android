@@ -124,7 +124,7 @@
     .then((doc) => renderFlight(parseDoc(doc.fields || {})))
     .catch((err) => {
       if (String(err.message) === "notfound") {
-        renderError("This shared flight could not be found. The link may have expired.");
+        renderError("This shared flight couldn't be found. The link may be incorrect or the flight is no longer available.");
       } else {
         renderError("Couldn't load this flight. Please check your connection and try again.");
       }
