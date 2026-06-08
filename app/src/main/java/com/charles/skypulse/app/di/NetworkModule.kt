@@ -123,4 +123,31 @@ object NetworkModule {
     @Singleton
     fun provideFr24Api(@Fr24Retrofit retrofit: Retrofit): Fr24Api =
         retrofit.create(Fr24Api::class.java)
+
+    @Provides
+    @Singleton
+    @GitHubRetrofit
+    fun provideGitHubRetrofit(client: OkHttpClient, json: Json): Retrofit {
+        val githubClient = client.newBuilder()
+            .addInterceptor { chain ->
+                val original = chain.request()
+                val request = original.newBuilder()
+                    .header("Authorization", "Bearer ${com.charles.skypulse.app.BuildConfig.GITHUB_API_TOKEN}")
+                    .header("Accept", "application/vnd.github+json")
+                    .header("X-GitHub-Api-Version", "2022-11-28")
+                    .build()
+                chain.proceed(request)
+            }
+            .build()
+        return Retrofit.Builder()
+            .baseUrl("https://api.github.com/")
+            .client(githubClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGitHubApi(@GitHubRetrofit retrofit: Retrofit): com.charles.skypulse.app.data.remote.GitHubApiService =
+        retrofit.create(com.charles.skypulse.app.data.remote.GitHubApiService::class.java)
 }

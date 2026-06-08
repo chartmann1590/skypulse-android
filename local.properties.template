@@ -25,3 +25,9 @@ KEYSTORE_FILE=
 KEYSTORE_PASSWORD=
 KEY_ALIAS=
 KEY_PASSWORD=
+
+# ── GitHub In-App Feedback (optional locally; required in CI) ──────────────────
+# Personal Access Token with Issues: Read/Write and Contents: Read/Write scopes.
+github.api.token=
+github.repo.owner=
+github.repo.name=

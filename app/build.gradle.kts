@@ -34,6 +34,10 @@ val admobBannerId = secret("ADMOB_BANNER_ID", testBannerId)
 val admobInterstitialId = secret("ADMOB_INTERSTITIAL_ID", testInterstitialId)
 val admobRewardedId = secret("ADMOB_REWARDED_ID", testRewardedId)
 
+val githubApiToken = localProps.getProperty("github.api.token") ?: System.getenv("GH_API_TOKEN") ?: ""
+val githubRepoOwner = localProps.getProperty("github.repo.owner") ?: System.getenv("GH_REPO_OWNER") ?: ""
+val githubRepoName = localProps.getProperty("github.repo.name") ?: System.getenv("GH_REPO_NAME") ?: ""
+
 android {
     namespace = "com.charles.skypulse.app"
     compileSdk = 37
@@ -54,6 +58,11 @@ android {
         buildConfigField("String", "ADMOB_REWARDED_ID", "\"$admobRewardedId\"")
         // AdMob application id is required as a manifest <meta-data> entry.
         manifestPlaceholders["admobAppId"] = admobAppId
+
+        // GitHub In-App Feedback config injected into BuildConfig
+        buildConfigField("String", "GITHUB_API_TOKEN", "\"$githubApiToken\"")
+        buildConfigField("String", "GITHUB_REPO_OWNER", "\"$githubRepoOwner\"")
+        buildConfigField("String", "GITHUB_REPO_NAME", "\"$githubRepoName\"")
     }
 
     signingConfigs {

@@ -13,8 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CardGiftcard
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Wifi
@@ -22,21 +25,29 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.charles.skypulse.app.domain.model.AltitudeUnit
 import com.charles.skypulse.app.domain.model.DistanceUnit
+import com.charles.skypulse.app.domain.model.SavedBugReport
 import com.charles.skypulse.app.domain.model.SpeedUnit
 import com.charles.skypulse.app.ui.components.GhostButton
 import com.charles.skypulse.app.ui.theme.SkyColors
 import com.charles.skypulse.app.ui.theme.SkyType
+import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -48,6 +59,21 @@ fun SettingsScreen(
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val cacheCleared by viewModel.cacheCleared.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
+
+    val submittedIssues by viewModel.submittedIssues.collectAsStateWithLifecycle()
+    val comments by viewModel.comments.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val isSubmitting by viewModel.isSubmitting.collectAsStateWithLifecycle()
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+
+    var showReportDialog by remember { mutableStateOf(false) }
+    var selectedIssueForDetail by remember { mutableStateOf<SavedBugReport?>(null) }
+
+    LaunchedEffect(selectedIssueForDetail) {
+        selectedIssueForDetail?.let {
+            viewModel.loadComments(it.number)
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
@@ -144,6 +170,69 @@ fun SettingsScreen(
                 GhostButton("Read privacy details", onClick = onOpenPrivacy, modifier = Modifier.fillMaxWidth())
             }
 
+            // Support & Feedback
+            Text("Support & Feedback", style = SkyType.TitleMd, color = SkyColors.OnSurface)
+            SettingsCard {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(Icons.Filled.BugReport, null, tint = SkyColors.PrimaryFixedDim)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Report a Problem", style = SkyType.TitleMd, color = SkyColors.OnSurface)
+                        Text(
+                            "Submit bugs directly to our GitHub repository.",
+                            style = SkyType.LabelSm,
+                            color = SkyColors.OnSurfaceVariant,
+                        )
+                    }
+                }
+                GhostButton("New Report", onClick = { showReportDialog = true }, modifier = Modifier.fillMaxWidth())
+
+                if (submittedIssues.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("Your Submitted Reports", style = SkyType.LabelSm, color = SkyColors.PrimaryFixedDim)
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        submittedIssues.forEach { report ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(SkyColors.SurfaceContainerHigh)
+                                    .clickable { selectedIssueForDetail = report }
+                                    .padding(12.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = report.title,
+                                        style = SkyType.BodyMd,
+                                        color = SkyColors.TextHigh,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    Text(
+                                        text = "Issue #${report.number} • ${report.createdAt}",
+                                        style = SkyType.LabelSm,
+                                        color = SkyColors.OnSurfaceVariant
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(if (report.status == "open") Color(0xFF00E676).copy(alpha = 0.15f) else SkyColors.Outline.copy(alpha = 0.15f))
+                                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                                ) {
+                                    Text(
+                                        text = report.status.uppercase(Locale.US),
+                                        style = SkyType.LabelSm,
+                                        color = if (report.status == "open") Color(0xFF00E676) else SkyColors.Outline
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             GhostButton(
                 text = if (cacheCleared) "Cache Cleared ✓" else "Clear Cache",
                 onClick = viewModel::clearCache,
@@ -172,6 +261,53 @@ fun SettingsScreen(
                 Text("Version 1.0.0", style = SkyType.LabelSm, color = SkyColors.Outline, textAlign = TextAlign.Center)
             }
         }
+    }
+
+    if (showReportDialog) {
+        ReportFormDialog(
+            isSubmitting = isSubmitting,
+            errorMessage = errorMessage,
+            onDismiss = {
+                viewModel.clearErrorMessage()
+                showReportDialog = false
+            },
+            onSubmit = { title, description, screenshotBytes, screenshotFileName, includeDiagnostics ->
+                viewModel.createIssue(
+                    title = title,
+                    description = description,
+                    screenshotBytes = screenshotBytes,
+                    screenshotFileName = screenshotFileName,
+                    includeDiagnostics = includeDiagnostics,
+                    onSuccess = {
+                        showReportDialog = false
+                    }
+                )
+            }
+        )
+    }
+
+    selectedIssueForDetail?.let { report ->
+        IssueDetailDialog(
+            report = report,
+            comments = comments,
+            isLoading = isLoading,
+            errorMessage = errorMessage,
+            onDismiss = {
+                viewModel.clearErrorMessage()
+                selectedIssueForDetail = null
+            },
+            onPostComment = { body, screenshotBytes, screenshotFileName ->
+                viewModel.postComment(
+                    issueNumber = report.number,
+                    body = body,
+                    screenshotBytes = screenshotBytes,
+                    screenshotFileName = screenshotFileName,
+                    onSuccess = {
+                        // comment auto-refreshed in viewmodel
+                    }
+                )
+            }
+        )
     }
 }
 
