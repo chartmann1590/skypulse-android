@@ -10,10 +10,9 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import okhttp3.OkHttpClient
-import okhttp3.Request
+import java.net.HttpURLConnection
+import java.net.URL
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 
 class DiagnosticsGatherer(private val context: Context) {
 
@@ -62,21 +61,16 @@ class DiagnosticsGatherer(private val context: Context) {
     }
 
     private fun getOllamaModels(): List<Pair<String, String>> {
-        val client = OkHttpClient.Builder()
-            .connectTimeout(1, TimeUnit.SECONDS)
-            .readTimeout(1, TimeUnit.SECONDS)
-            .build()
-
-        // Try local emulator loopback, localhost, and LifeCaptureOS network host
+        // Plain HTTP to local/emulator addresses — using HttpURLConnection (no TLS, no cert pinning needed).
         val hosts = listOf("10.0.2.2", "127.0.0.1", "10.0.0.74")
         for (host in hosts) {
             try {
-                val request = Request.Builder()
-                    .url("http://$host:11434/api/tags")
-                    .build()
-                client.newCall(request).execute().use { response ->
-                    if (response.isSuccessful) {
-                        val bodyString = response.body?.string() ?: ""
+                val conn = URL("http://$host:11434/api/tags").openConnection() as HttpURLConnection
+                conn.connectTimeout = 1_000
+                conn.readTimeout = 1_000
+                try {
+                    if (conn.responseCode == HttpURLConnection.HTTP_OK) {
+                        val bodyString = conn.inputStream.bufferedReader().readText()
                         val json = Json.parseToJsonElement(bodyString).jsonObject
                         val modelsArray = json["models"]?.jsonArray
                         if (modelsArray != null) {
@@ -87,6 +81,8 @@ class DiagnosticsGatherer(private val context: Context) {
                             }
                         }
                     }
+                } finally {
+                    conn.disconnect()
                 }
             } catch (e: Exception) {
                 // Continue to next host

@@ -12,6 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -128,7 +129,14 @@ object NetworkModule {
     @Singleton
     @GitHubRetrofit
     fun provideGitHubRetrofit(client: OkHttpClient, json: Json): Retrofit {
+        // Certificate pinning: Sectigo intermediate (survives leaf rotation) + current leaf backup.
+        // Pins match network_security_config.xml — update both when the intermediate rotates.
+        val githubPinner = CertificatePinner.Builder()
+            .add("api.github.com", "sha256/ZSagvDzjltLkewXEBuDxIzpW/dpVw1Juvvmd0hhkzdY=") // intermediate
+            .add("api.github.com", "sha256/QVnLDkTvhX8bfBbaP6XeqWLCOja893s79lYfjQc/hWI=") // leaf backup
+            .build()
         val githubClient = client.newBuilder()
+            .certificatePinner(githubPinner)
             .addInterceptor { chain ->
                 val original = chain.request()
                 val request = original.newBuilder()

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Certificate pinning for outbound HTTPS connections.
+
+    Pins the Sectigo Public Server Authentication CA DV E36 intermediate (stable;
+    survives leaf-cert rotation) plus the current *.github.com leaf cert as a
+    belt-and-suspenders backup.  The expiration date causes Android to fall back to
+    normal CA validation after that date, providing a fail-safe if we forget to
+    update pins before the intermediate rotates.
+
+    To regenerate the intermediate pin:
+      curl -s http://crt.sectigo.com/SectigoPublicServerAuthenticationCADVE36.crt |
+        openssl x509 -inform DER -pubkey -noout |
+        openssl pkey -pubin -outform der |
+        openssl dgst -sha256 -binary | base64
+
+    To regenerate the leaf pin:
+      openssl s_client -connect api.github.com:443 -servername api.github.com </dev/null 2>/dev/null |
+        openssl x509 -pubkey -noout |
+        openssl pkey -pubin -outform der |
+        openssl dgst -sha256 -binary | base64
+-->
+<network-security-config>
+    <domain-config>
+        <domain includeSubdomains="false">api.github.com</domain>
+        <!-- Expiration is a fail-safe: after this date Android falls back to normal CA validation. -->
+        <pin-set expiration="2027-06-01">
+            <!-- Sectigo Public Server Authentication CA DV E36 (intermediate, stable) -->
+            <pin digest="SHA-256">ZSagvDzjltLkewXEBuDxIzpW/dpVw1Juvvmd0hhkzdY=</pin>
+            <!-- *.github.com leaf cert (expires 2026-08-01; backup pin) -->
+            <pin digest="SHA-256">QVnLDkTvhX8bfBbaP6XeqWLCOja893s79lYfjQc/hWI=</pin>
+        </pin-set>
+    </domain-config>
+</network-security-config>
