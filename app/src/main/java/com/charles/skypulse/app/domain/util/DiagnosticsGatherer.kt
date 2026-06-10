@@ -6,17 +6,11 @@ import android.os.Build
 import androidx.core.content.pm.PackageInfoCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.Locale
 
 class DiagnosticsGatherer(private val context: Context) {
 
-    suspend fun gatherDiagnostics(includeModels: Boolean): String = withContext(Dispatchers.IO) {
+    suspend fun gatherDiagnostics(): String = withContext(Dispatchers.IO) {
         val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
         val appVersionName = packageInfo.versionName ?: "Unknown"
         val appVersionCode = PackageInfoCompat.getLongVersionCode(packageInfo)
@@ -45,49 +39,6 @@ class DiagnosticsGatherer(private val context: Context) {
         sb.append("- **System Locale:** ").append(Locale.getDefault().toString()).append("\n")
         sb.append("- **Disk Storage:** ").append(String.format(Locale.US, "%.2f GB free / %.2f GB total", freeSpaceGb, totalSpaceGb)).append("\n")
         sb.append("- **System Memory:** ").append(String.format(Locale.US, "%.2f GB free / %.2f GB total RAM", freeRamGb, totalRamGb)).append("\n")
-
-        if (includeModels) {
-            sb.append("\n### Configured Models\n")
-            val models = getOllamaModels()
-            if (models.isEmpty()) {
-                sb.append("_No local or remote Ollama models detected (service unreachable)._\n")
-            } else {
-                models.forEach { (name, location) ->
-                    sb.append("- **Model:** `").append(name).append("` (Type: ").append(location).append(")\n")
-                }
-            }
-        }
         sb.toString()
-    }
-
-    private fun getOllamaModels(): List<Pair<String, String>> {
-        // Plain HTTP to local/emulator addresses — using HttpURLConnection (no TLS, no cert pinning needed).
-        val hosts = listOf("10.0.2.2", "127.0.0.1", "10.0.0.74")
-        for (host in hosts) {
-            try {
-                val conn = URL("http://$host:11434/api/tags").openConnection() as HttpURLConnection
-                conn.connectTimeout = 1_000
-                conn.readTimeout = 1_000
-                try {
-                    if (conn.responseCode == HttpURLConnection.HTTP_OK) {
-                        val bodyString = conn.inputStream.bufferedReader().readText()
-                        val json = Json.parseToJsonElement(bodyString).jsonObject
-                        val modelsArray = json["models"]?.jsonArray
-                        if (modelsArray != null) {
-                            return modelsArray.map { modelElement ->
-                                val name = modelElement.jsonObject["name"]?.jsonPrimitive?.content ?: "Unknown"
-                                val isOnDevice = host == "127.0.0.1"
-                                name to (if (isOnDevice) "On-Device" else "Remote (Ollama Host: $host)")
-                            }
-                        }
-                    }
-                } finally {
-                    conn.disconnect()
-                }
-            } catch (e: Exception) {
-                // Continue to next host
-            }
-        }
-        return emptyList()
     }
 }

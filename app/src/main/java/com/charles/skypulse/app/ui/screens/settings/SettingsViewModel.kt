@@ -76,7 +76,7 @@ class SettingsViewModel @Inject constructor(
             _errorMessage.value = null
             try {
                 val diagnostics = if (includeDiagnostics) {
-                    DiagnosticsGatherer(context).gatherDiagnostics(includeModels = true)
+                    DiagnosticsGatherer(context).gatherDiagnostics()
                 } else {
                     null
                 }
