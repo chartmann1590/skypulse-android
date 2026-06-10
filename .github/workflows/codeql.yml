@@ -43,7 +43,6 @@ jobs:
         uses: github/codeql-action/init@v4
         with:
           languages: java-kotlin
-          tools: latest
           build-mode: manual
           config-file: .github/codeql-config.yml
           queries: security-and-quality

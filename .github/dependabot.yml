@@ -25,6 +25,10 @@ updates:
       hilt:
         patterns:
           - "com.google.dagger*"
+    ignore:
+      # CodeQL only supports Kotlin < 2.3.30; pin to 2.3.x until CodeQL adds 2.4+ support.
+      - dependency-name: "org.jetbrains.kotlin*"
+        versions: [">= 2.4.0"]
 
   # GitHub Actions used in workflows.
   - package-ecosystem: "github-actions"
