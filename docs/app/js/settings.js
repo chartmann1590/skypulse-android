@@ -65,10 +65,6 @@ function _render() {
             <span class="bg-primary/10 text-primary border border-primary/30 px-3 py-1 rounded-full font-label-sm text-label-sm">Primary</span>
           </li>
           <li class="flex items-center justify-between">
-            <span class="font-body-md text-body-md text-on-surface-variant">OpenSky</span>
-            <span class="bg-surface-container-high text-text-med border border-glass-stroke px-3 py-1 rounded-full font-label-sm text-label-sm">Fallback</span>
-          </li>
-          <li class="flex items-center justify-between">
             <span class="font-body-md text-body-md text-on-surface-variant">OpenFlights DB</span>
             <span class="bg-surface-container-high text-text-med border border-glass-stroke px-3 py-1 rounded-full font-label-sm text-label-sm">Active</span>
           </li>
