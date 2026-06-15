@@ -1,5 +1,7 @@
 package com.charles.skypulse.app.ui.screens.profile
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,8 +26,10 @@ import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Login
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.CircularProgressIndicator
@@ -102,6 +106,7 @@ fun ProfileScreen(
                 onSignUp = viewModel::createWithEmail,
                 onReset = viewModel::sendPasswordReset,
             )
+            WebAppCard(email = state.user?.email)
         }
     }
 }
@@ -254,6 +259,45 @@ private fun SignedOutProfile(
             CircularProgressIndicator(color = SkyColors.PrimaryFixedDim, modifier = Modifier.align(Alignment.CenterHorizontally))
         }
         FeedbackText(message = state.message, error = state.error)
+    }
+}
+
+@Composable
+private fun WebAppCard(email: String?) {
+    val context = LocalContext.current
+    val webAppUrl = "https://chartmann1590.github.io/skypulse-android/app/"
+    ProfileCard {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(Icons.Filled.Language, null, tint = SkyColors.PrimaryFixedDim)
+            Text("SkyPulse Web", style = SkyType.TitleMd, color = SkyColors.TextHigh)
+        }
+        if (email != null) {
+            Text(
+                "Your saved aircraft, airports, and areas sync automatically with SkyPulse Web. " +
+                    "Sign in with $email on any browser or install it to your iPhone home screen to access your saves from anywhere.",
+                style = SkyType.BodyMd,
+                color = SkyColors.OnSurfaceVariant,
+            )
+        } else {
+            Text(
+                "SkyPulse is also available as a web app on any browser — and installable as a PWA on iPhone. " +
+                    "Sign in with the same account here and on the web to keep your saved aircraft, airports, and areas in sync across all your devices.",
+                style = SkyType.BodyMd,
+                color = SkyColors.OnSurfaceVariant,
+            )
+        }
+        AuthButton(
+            text = "Open Web App",
+            enabled = true,
+            leadingIcon = Icons.Filled.OpenInBrowser,
+            filled = false,
+            onClick = {
+                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(webAppUrl)))
+            },
+        )
     }
 }
 
