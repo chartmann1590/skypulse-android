@@ -33,7 +33,23 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Write google-services.json from secret
-        run: printf '%s' "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          value = os.environ["GOOGLE_SERVICES_JSON"].strip()
+          if value.startswith("{"):
+              config = value
+          else:
+              config = base64.b64decode(value).decode("utf-8")
+          json.loads(config)
+          Path("app/google-services.json").write_text(config)
+          PY
 
       - name: Validate Firebase auth config
         run: |
@@ -64,7 +80,7 @@ jobs:
         run: ./gradlew lintDebug --stacktrace
 
       - name: Upload Lint results to code scanning
-        if: always()
+        if: always() && hashFiles('app/build/reports/lint-results-debug.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: app/build/reports/lint-results-debug.sarif
@@ -142,7 +158,23 @@ jobs:
         run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
 
       - name: Write google-services.json from secret
-        run: printf '%s' "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          value = os.environ["GOOGLE_SERVICES_JSON"].strip()
+          if value.startswith("{"):
+              config = value
+          else:
+              config = base64.b64decode(value).decode("utf-8")
+          json.loads(config)
+          Path("app/google-services.json").write_text(config)
+          PY
 
       - name: Validate Firebase auth config
         run: |

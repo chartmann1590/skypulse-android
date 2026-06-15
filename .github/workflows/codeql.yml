@@ -32,9 +32,24 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Write google-services.json from secret
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
-          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
-            printf '%s' "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          value = os.environ["GOOGLE_SERVICES_JSON"].strip()
+          if value.startswith("{"):
+              config = value
+          else:
+              config = base64.b64decode(value).decode("utf-8")
+          json.loads(config)
+          Path("app/google-services.json").write_text(config)
+          PY
           else
             cp app/google-services.json.template app/google-services.json
           fi
