@@ -74,7 +74,7 @@
       <div class="brand"><a href="index.html">SkyPulse</a></div>
       <div class="nav-links">
         <a href="index.html#features">Features</a>
-        <a href="https://github.com/chartmann1590/skypulse-android/releases">Download</a>
+        <a href="https://play.google.com/store/apps/details?id=com.charles.skypulse.app">Google Play</a>
         <a href="https://github.com/chartmann1590/skypulse-android">GitHub</a>
       </div>
     </nav>
@@ -92,7 +92,8 @@
     <br /><br />
     <a href="index.html">Home</a> ·
     <a href="privacy.html">Privacy</a> ·
-    <a href="https://github.com/chartmann1590/skypulse-android/releases">Download the app</a>
+    <a href="https://play.google.com/store/apps/details?id=com.charles.skypulse.app">Get it on Google Play</a> ·
+    <a href="https://github.com/chartmann1590/skypulse-android/releases">GitHub Releases</a>
   </footer>
 </div>
 
@@ -102,6 +103,7 @@
 (function () {
   const PROJECT_ID = "skypulse-tracker-2026";
   const API_KEY = "AIzaSyDAE1ILKJgqQ-xBlhG1axCxhRhuqEuwYcc";
+  const PLAY_STORE = "https://play.google.com/store/apps/details?id=com.charles.skypulse.app";
   const RELEASES = "https://github.com/chartmann1590/skypulse-android/releases";
 
   const params = new URLSearchParams(location.search);
@@ -172,7 +174,8 @@
       '<span class="pill"><span class="dot" style="background:var(--red);box-shadow:0 0 10px var(--red)"></span> Unavailable</span>' +
       '<h1 style="font-size:24px;margin-top:16px">' + esc(msg) + '</h1>' +
       '<div class="cta center" style="justify-content:center">' +
-      '<a class="btn btn-primary" href="' + RELEASES + '">⬇ Get SkyPulse</a>' +
+      '<a class="btn btn-primary" href="' + PLAY_STORE + '">🤖 Get it on Google Play</a>' +
+      '<a class="btn btn-ghost" href="' + RELEASES + '">⬇ Download APK</a>' +
       '<a class="btn btn-ghost" href="index.html">Back to home</a>' +
       '</div></div>';
   }
@@ -228,7 +231,7 @@
         stats +
         '<div class="cta">' +
           '<a class="btn btn-primary" id="openApp" href="' + appLink + '">📲 Open in SkyPulse</a>' +
-          '<a class="btn btn-ghost" href="' + RELEASES + '">⬇ Get the app</a>' +
+          '<a class="btn btn-ghost" href="' + PLAY_STORE + '">🤖 Get it on Google Play</a>' +
         '</div>' +
         '<p class="note">Don\'t have SkyPulse yet? Install it, then tap “Open in SkyPulse” to see this flight live on your own map. ' +
           'Positions are a snapshot from when the flight was shared.</p>' +

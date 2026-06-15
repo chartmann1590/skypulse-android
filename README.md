@@ -11,14 +11,15 @@ No account. No sign-up. No API key. Just open it and look up.
 </p>
 
 <p align="center">
-  ⬇ <a href="https://github.com/chartmann1590/skypulse-android/releases"><strong>Download the latest build</strong></a> ·
+  🤖 <a href="https://play.google.com/store/apps/details?id=com.charles.skypulse.app"><strong>Get it on Google Play</strong></a> ·
+  ⬇ <a href="https://github.com/chartmann1590/skypulse-android/releases"><strong>Download APK</strong></a> ·
   🌐 <a href="https://chartmann1590.github.io/skypulse-android/">Website</a> ·
   📜 <a href="https://chartmann1590.github.io/skypulse-android/privacy.html">Privacy</a> ·
   ☕ <a href="https://buymeacoffee.com/charleshartmann">Buy me a coffee</a>
 </p>
 
-> **Google Play — coming soon.** Until then, install the latest signed APK from the
-> [Releases page](https://github.com/chartmann1590/skypulse-android/releases).
+> **Get it on Google Play:** You can download SkyPulse directly from [Google Play](https://play.google.com/store/apps/details?id=com.charles.skypulse.app).
+> Alternatively, you can install the signed APK from the [Releases page](https://github.com/chartmann1590/skypulse-android/releases).
 
 ---
 
