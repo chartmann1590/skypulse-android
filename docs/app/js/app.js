@@ -104,8 +104,7 @@ document.addEventListener('aircraft-updated', e => {
   // Status indicator
   const statusEl = document.getElementById('status-indicator');
   if (statusEl) {
-    const src = api.lastStatus.source || 'airplanes.live';
-    statusEl.textContent = `${_allAircraft.length} aircraft · ${src}`;
+    statusEl.textContent = `${_allAircraft.length} aircraft · airplanes.live`;
   }
 
   _updateLastUpdateLabel();
