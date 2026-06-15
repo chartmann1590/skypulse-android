@@ -89,6 +89,7 @@ async function _fetchAdsbLol(lat, lon, radiusNm) {
   const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
   if (!res.ok) throw new Error(`ADSB.lol HTTP ${res.status}`);
   const json = await res.json();
+  if (json.error) throw new Error(`ADSB.lol: ${json.error}`);
   const ac = json.ac || json.aircraft || [];
   return ac.map(_normalizeAdsbLol).filter(a => a.lat != null && a.lon != null);
 }

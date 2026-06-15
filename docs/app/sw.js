@@ -1,5 +1,5 @@
 /* SkyPulse Service Worker */
-const SHELL_CACHE = 'skypulse-shell-v1';
+const SHELL_CACHE = 'skypulse-shell-v2';
 const SHELL_URLS = [
   '/skypulse-android/app/',
   '/skypulse-android/app/index.html',
@@ -63,15 +63,9 @@ self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   if (!url.protocol.startsWith('http')) return;
 
-  // ADS-B APIs → network-first, no cache fallback (data must be fresh)
+  // ADS-B APIs → don't intercept; let browser fetch directly so CORS and
+  // network errors are handled by api.js rather than the SW context
   if (API_ORIGINS.some(o => url.hostname.includes(o))) {
-    event.respondWith(
-      fetch(event.request).catch(() =>
-        new Response(JSON.stringify({ error: 'offline' }), {
-          headers: { 'Content-Type': 'application/json' }
-        })
-      )
-    );
     return;
   }
 
