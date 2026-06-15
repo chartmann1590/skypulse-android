@@ -13,7 +13,8 @@ import { esc, haversineNm, formatAlt, formatSpeed, formatDist, relTime, vrLabel,
 import { fetchRouteInfo } from './api.js';
 
 /* ── State ── */
-let _location = null;          // { lat, lon }
+let _location = { lat: 39.8283, lon: -98.5795 }; // default: center of continental US
+let _hasRealLocation = false;
 let _currentUser = null;
 let _activeTab = 'map';
 let _activeAircraft = null;    // currently shown in detail sheet
@@ -36,10 +37,14 @@ if ('geolocation' in navigator) {
   navigator.geolocation.watchPosition(
     pos => {
       _location = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      _hasRealLocation = true;
       mapMod.setUserLocation(_location.lat, _location.lon);
       _updateLastUpdateLabel();
     },
-    err => console.warn('[Geo]', err.message),
+    err => {
+      console.warn('[Geo]', err.message);
+      _updateLastUpdateLabel();
+    },
     { enableHighAccuracy: true, maximumAge: 10000 }
   );
 }
@@ -107,8 +112,8 @@ document.addEventListener('aircraft-updated', e => {
 function _updateLastUpdateLabel() {
   const el = document.getElementById('last-update-label');
   if (!el) return;
-  if (!_location) {
-    el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant/30"></span> Waiting for location...`;
+  if (!_hasRealLocation) {
+    el.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant/30"></span> Default location — enable GPS for local view`;
     return;
   }
   const ts = api.lastStatus.timestamp;
