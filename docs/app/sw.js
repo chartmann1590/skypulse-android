@@ -1,5 +1,5 @@
 /* SkyPulse Service Worker */
-const SHELL_CACHE = 'skypulse-shell-v2';
+const SHELL_CACHE = 'skypulse-shell-v3';
 const SHELL_URLS = [
   '/skypulse-android/app/',
   '/skypulse-android/app/index.html',
@@ -18,7 +18,7 @@ const SHELL_URLS = [
 ];
 
 const API_ORIGINS = [
-  'api.adsb.lol',
+  'api.airplanes.live',
   'api.adsbdb.com',
 ];
 

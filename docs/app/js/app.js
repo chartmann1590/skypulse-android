@@ -36,9 +36,11 @@ function getLocation() { return _location; }
 if ('geolocation' in navigator) {
   navigator.geolocation.watchPosition(
     pos => {
+      const firstFix = !_hasRealLocation;
       _location = { lat: pos.coords.latitude, lon: pos.coords.longitude };
       _hasRealLocation = true;
       mapMod.setUserLocation(_location.lat, _location.lon);
+      if (firstFix) mapMod.centerOnUser(_location.lat, _location.lon);
       _updateLastUpdateLabel();
     },
     err => {
@@ -102,7 +104,7 @@ document.addEventListener('aircraft-updated', e => {
   // Status indicator
   const statusEl = document.getElementById('status-indicator');
   if (statusEl) {
-    const src = api.lastStatus.source === 'opensky' ? 'OpenSky' : 'ADSB.lol';
+    const src = api.lastStatus.source || 'airplanes.live';
     statusEl.textContent = `${_allAircraft.length} aircraft · ${src}`;
   }
 

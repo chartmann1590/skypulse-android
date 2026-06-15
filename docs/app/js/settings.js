@@ -61,7 +61,7 @@ function _render() {
       <div class="bg-glass-surface backdrop-blur-xl border border-glass-stroke rounded-xl p-card-padding">
         <ul class="space-y-3">
           <li class="flex items-center justify-between">
-            <span class="font-body-md text-body-md text-on-surface-variant">ADSB.lol</span>
+            <span class="font-body-md text-body-md text-on-surface-variant">Airplanes.live</span>
             <span class="bg-primary/10 text-primary border border-primary/30 px-3 py-1 rounded-full font-label-sm text-label-sm">Primary</span>
           </li>
           <li class="flex items-center justify-between">

@@ -44,8 +44,8 @@ async function _poll() {
   if (!loc) return;
 
   try {
-    const aircraft = await fetchOnce(loc.lat, loc.lon, 50);
-    lastStatus.source = aircraft._source || 'adsb.lol';
+    const aircraft = await fetchOnce(loc.lat, loc.lon, 100);
+    lastStatus.source = aircraft._source || 'airplanes.live';
     lastStatus.count = aircraft.length;
     lastStatus.timestamp = Date.now();
     lastStatus.stale = false;
@@ -74,17 +74,17 @@ export async function fetchOnce(lat, lon, radiusNm = 50) {
   } catch (primaryErr) {
     console.warn('[API] ADSB.lol unavailable:', primaryErr.message);
     const empty = [];
-    empty._source = 'adsb.lol';
+    empty._source = 'airplanes.live';
     return empty;
   }
 }
 
 async function _fetchAdsbLol(lat, lon, radiusNm) {
-  const url = `https://api.adsb.lol/v2/lat/${lat}/lon/${lon}/dist/${Math.round(radiusNm)}`;
+  const url = `https://api.airplanes.live/v2/point/${lat}/${lon}/${Math.round(radiusNm)}`;
   const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-  if (!res.ok) throw new Error(`ADSB.lol HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`airplanes.live HTTP ${res.status}`);
   const json = await res.json();
-  if (json.error) throw new Error(`ADSB.lol: ${json.error}`);
+  if (json.error) throw new Error(`airplanes.live: ${json.error}`);
   const ac = json.ac || json.aircraft || [];
   return ac.map(_normalizeAdsbLol).filter(a => a.lat != null && a.lon != null);
 }
