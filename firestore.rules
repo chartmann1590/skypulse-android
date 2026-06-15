@@ -28,6 +28,18 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /users/{userId}/saved_aircraft/{savedId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/saved_airports/{savedId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/saved_areas/{savedId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
     // Everything else is locked down.
     match /{document=**} {
       allow read, write: if false;

@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Icon
@@ -52,6 +53,7 @@ import java.util.Locale
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onOpenProfile: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenRewards: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
@@ -152,6 +154,21 @@ fun SettingsScreen(
                     }
                 }
                 GhostButton("Open rewards", onClick = onOpenRewards, modifier = Modifier.fillMaxWidth())
+            }
+
+            SettingsCard {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(Icons.Filled.Person, null, tint = SkyColors.PrimaryFixedDim)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("Profile", style = SkyType.TitleMd, color = SkyColors.OnSurface)
+                        Text(
+                            "Sign in with Google or an email account.",
+                            style = SkyType.LabelSm,
+                            color = SkyColors.OnSurfaceVariant,
+                        )
+                    }
+                }
+                GhostButton("Open profile", onClick = onOpenProfile, modifier = Modifier.fillMaxWidth())
             }
 
             // Privacy

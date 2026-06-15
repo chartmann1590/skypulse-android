@@ -24,6 +24,7 @@ import com.charles.skypulse.app.ui.screens.map.HomeMapScreen
 import com.charles.skypulse.app.ui.screens.nearby.NearbyScreen
 import com.charles.skypulse.app.ui.screens.onboarding.OnboardingScreen
 import com.charles.skypulse.app.ui.screens.privacy.PrivacyScreen
+import com.charles.skypulse.app.ui.screens.profile.ProfileScreen
 import com.charles.skypulse.app.ui.screens.rewards.RewardsIntroDialog
 import com.charles.skypulse.app.ui.screens.rewards.RewardsScreen
 import com.charles.skypulse.app.ui.screens.saved.SavedScreen
@@ -135,12 +136,19 @@ fun SkyPulseNavHost(
             composable(Routes.SETTINGS) {
                 SettingsScreen(
                     onBack = { navController.popBackStack() },
+                    onOpenProfile = { navController.navigate(Routes.PROFILE) },
                     onOpenPrivacy = { navController.navigate(Routes.PRIVACY) },
                     onOpenRewards = { navController.navigate(Routes.REWARDS) },
                 )
             }
             composable(Routes.PRIVACY) {
                 PrivacyScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.PROFILE) {
+                ProfileScreen(
+                    showBack = currentRoute !in BOTTOM_BAR_ROUTES,
+                    onBack = { navController.popBackStack() },
+                )
             }
             composable(Routes.REWARDS) {
                 RewardsScreen(onBack = { navController.popBackStack() })

@@ -35,6 +35,18 @@ jobs:
       - name: Write google-services.json from secret
         run: printf '%s' "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
 
+      - name: Validate Firebase auth config
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path("app/google-services.json").read_text())
+          oauth_clients = config["client"][0].get("oauth_client", [])
+          assert any(client.get("client_type") == 1 for client in oauth_clients), "missing Android OAuth client"
+          assert any(client.get("client_type") == 3 for client in oauth_clients), "missing web OAuth client"
+          PY
+
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 
@@ -131,6 +143,18 @@ jobs:
 
       - name: Write google-services.json from secret
         run: printf '%s' "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 -d > app/google-services.json
+
+      - name: Validate Firebase auth config
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path("app/google-services.json").read_text())
+          oauth_clients = config["client"][0].get("oauth_client", [])
+          assert any(client.get("client_type") == 1 for client in oauth_clients), "missing Android OAuth client"
+          assert any(client.get("client_type") == 3 for client in oauth_clients), "missing web OAuth client"
+          PY
 
       - name: Build signed release APK and AAB
         run: ./gradlew assembleRelease bundleRelease --stacktrace

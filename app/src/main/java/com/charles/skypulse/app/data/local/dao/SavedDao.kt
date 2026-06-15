@@ -22,6 +22,9 @@ interface SavedDao {
     @Query("SELECT * FROM saved_aircraft ORDER BY savedAtEpochMs DESC")
     fun observeAircraft(): Flow<List<SavedAircraftEntity>>
 
+    @Query("SELECT * FROM saved_aircraft ORDER BY savedAtEpochMs DESC")
+    suspend fun getAircraft(): List<SavedAircraftEntity>
+
     @Query("SELECT EXISTS(SELECT 1 FROM saved_aircraft WHERE id = :id)")
     fun isAircraftSaved(id: String): Flow<Boolean>
 
@@ -35,13 +38,19 @@ interface SavedDao {
     @Query("SELECT * FROM saved_airports ORDER BY savedAtEpochMs DESC")
     fun observeAirports(): Flow<List<SavedAirportEntity>>
 
+    @Query("SELECT * FROM saved_airports ORDER BY savedAtEpochMs DESC")
+    suspend fun getAirports(): List<SavedAirportEntity>
+
     // --- Areas ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun saveArea(entity: SavedAreaEntity)
+    suspend fun saveArea(entity: SavedAreaEntity): Long
 
     @Query("DELETE FROM saved_areas WHERE id = :id")
     suspend fun deleteArea(id: Long)
 
     @Query("SELECT * FROM saved_areas ORDER BY savedAtEpochMs DESC")
     fun observeAreas(): Flow<List<SavedAreaEntity>>
+
+    @Query("SELECT * FROM saved_areas ORDER BY savedAtEpochMs DESC")
+    suspend fun getAreas(): List<SavedAreaEntity>
 }

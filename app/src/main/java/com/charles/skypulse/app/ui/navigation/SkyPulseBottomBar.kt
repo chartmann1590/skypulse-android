@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.remember
 import com.charles.skypulse.app.ui.theme.SkyColors
@@ -40,7 +41,12 @@ fun SkyPulseBottomBar(
     ) {
         BottomTab.entries.forEach { tab ->
             val selected = currentRoute == tab.route
-            BottomBarItem(tab = tab, selected = selected, onClick = { onTabSelected(tab) })
+            BottomBarItem(
+                tab = tab,
+                selected = selected,
+                modifier = Modifier.weight(1f),
+                onClick = { onTabSelected(tab) },
+            )
         }
     }
 }
@@ -49,18 +55,19 @@ fun SkyPulseBottomBar(
 private fun BottomBarItem(
     tab: BottomTab,
     selected: Boolean,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
     val tint = if (selected) SkyColors.PrimaryFixedDim else SkyColors.OnSurfaceVariant
     Column(
-        modifier = Modifier
+        modifier = modifier
             .clip(RoundedCornerShape(12.dp))
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
                 onClick = onClick,
             )
-            .padding(horizontal = 10.dp, vertical = 4.dp),
+            .padding(horizontal = 2.dp, vertical = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
@@ -69,6 +76,12 @@ private fun BottomBarItem(
             tint = tint,
             modifier = Modifier.size(24.dp),
         )
-        Text(text = tab.label, style = SkyType.LabelSm, color = tint)
+        Text(
+            text = tab.label,
+            style = SkyType.LabelSm,
+            color = tint,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }

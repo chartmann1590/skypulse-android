@@ -172,6 +172,9 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.osmdroid.android)
     implementation(libs.accompanist.permissions)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Firebase (Spark tier)
     implementation(platform(libs.firebase.bom))
