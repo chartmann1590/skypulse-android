@@ -13,13 +13,27 @@ No account. No sign-up. No API key. Just open it and look up.
 <p align="center">
   🤖 <a href="https://play.google.com/store/apps/details?id=com.charles.skypulse.app"><strong>Get it on Google Play</strong></a> ·
   ⬇ <a href="https://github.com/chartmann1590/skypulse-android/releases"><strong>Download APK</strong></a> ·
-  🌐 <a href="https://chartmann1590.github.io/skypulse-android/">Website</a> ·
+  🌐 <a href="https://chartmann1590.github.io/skypulse-android/app/"><strong>Web App</strong></a> ·
+  🏠 <a href="https://chartmann1590.github.io/skypulse-android/">Website</a> ·
   📜 <a href="https://chartmann1590.github.io/skypulse-android/privacy.html">Privacy</a> ·
   ☕ <a href="https://buymeacoffee.com/charleshartmann">Buy me a coffee</a>
 </p>
 
 > **Get it on Google Play:** You can download SkyPulse directly from [Google Play](https://play.google.com/store/apps/details?id=com.charles.skypulse.app).
 > Alternatively, you can install the signed APK from the [Releases page](https://github.com/chartmann1590/skypulse-android/releases).
+
+---
+
+## Web App
+
+SkyPulse is also available as a full Progressive Web App at
+**[chartmann1590.github.io/skypulse-android/app/](https://chartmann1590.github.io/skypulse-android/app/)**
+
+- **Any browser** — same live map, Nearby list, Airport search, Alerts, and Saved items as the Android app
+- **iPhone / iPad** — install from Safari ("Add to Home Screen") for a standalone, app-like experience without the App Store
+- **Synced** — sign in with Google or email to sync your saved aircraft, airports, and areas with the Android app via Firebase
+- **PWA-installable** — full `manifest.json`, service worker, and Apple meta tags; passes Lighthouse installability checks
+- **No build step** — vanilla ES6 modules served directly from GitHub Pages; Leaflet for maps, Firebase JS SDK v11 for auth/sync
 
 ---
 
@@ -79,9 +93,9 @@ If SkyPulse is useful to you, you can support development here:
 
 ## Data attribution
 
-- Aircraft data © [ADSB.lol](https://www.adsb.lol/) and the
-  [OpenSky Network](https://opensky-network.org/).
-- Flight routes from Flightradar24's public live feed and [adsbdb](https://www.adsbdb.com/).
+- Aircraft data © [airplanes.live](https://airplanes.live/) (Android + web) and the
+  [OpenSky Network](https://opensky-network.org/) (Android fallback).
+- Flight routes from [adsbdb](https://www.adsbdb.com/).
 - Airport/airline data from [OpenFlights](https://openflights.org/data.php).
 - Map tiles © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors.
 

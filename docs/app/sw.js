@@ -1,5 +1,5 @@
 /* SkyPulse Service Worker */
-const SHELL_CACHE = 'skypulse-shell-v3';
+const SHELL_CACHE = 'skypulse-shell-v4';
 const SHELL_URLS = [
   '/skypulse-android/app/',
   '/skypulse-android/app/index.html',

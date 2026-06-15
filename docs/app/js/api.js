@@ -68,28 +68,28 @@ async function _poll() {
  */
 export async function fetchOnce(lat, lon, radiusNm = 50) {
   try {
-    const data = await _fetchAdsbLol(lat, lon, radiusNm);
-    data._source = 'adsb.lol';
+    const data = await _fetchAirplanesLive(lat, lon, radiusNm);
+    data._source = 'airplanes.live';
     return data;
-  } catch (primaryErr) {
-    console.warn('[API] ADSB.lol unavailable:', primaryErr.message);
+  } catch (err) {
+    console.warn('[API] airplanes.live unavailable:', err.message);
     const empty = [];
     empty._source = 'airplanes.live';
     return empty;
   }
 }
 
-async function _fetchAdsbLol(lat, lon, radiusNm) {
+async function _fetchAirplanesLive(lat, lon, radiusNm) {
   const url = `https://api.airplanes.live/v2/point/${lat}/${lon}/${Math.round(radiusNm)}`;
   const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
   if (!res.ok) throw new Error(`airplanes.live HTTP ${res.status}`);
   const json = await res.json();
   if (json.error) throw new Error(`airplanes.live: ${json.error}`);
   const ac = json.ac || json.aircraft || [];
-  return ac.map(_normalizeAdsbLol).filter(a => a.lat != null && a.lon != null);
+  return ac.map(_normalizeAc).filter(a => a.lat != null && a.lon != null);
 }
 
-function _normalizeAdsbLol(ac) {
+function _normalizeAc(ac) {
   return {
     hex: (ac.hex || '').toLowerCase(),
     callsign: (ac.flight || ac.r || '').trim() || null,
