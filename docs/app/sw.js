@@ -19,7 +19,6 @@ const SHELL_URLS = [
 
 const API_ORIGINS = [
   'api.adsb.lol',
-  'opensky-network.org',
   'api.adsbdb.com',
 ];
 

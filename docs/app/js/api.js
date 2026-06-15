@@ -72,39 +72,21 @@ export async function fetchOnce(lat, lon, radiusNm = 50) {
     data._source = 'adsb.lol';
     return data;
   } catch (primaryErr) {
-    console.warn('[API] ADSB.lol failed, trying OpenSky:', primaryErr.message);
-    try {
-      const data = await _fetchOpenSky(lat, lon, radiusNm);
-      data._source = 'opensky';
-      return data;
-    } catch (fallbackErr) {
-      console.error('[API] Both sources failed:', fallbackErr.message);
-      return [];
-    }
+    console.warn('[API] ADSB.lol unavailable:', primaryErr.message);
+    const empty = [];
+    empty._source = 'adsb.lol';
+    return empty;
   }
 }
 
 async function _fetchAdsbLol(lat, lon, radiusNm) {
   const url = `https://api.adsb.lol/v2/lat/${lat}/lon/${lon}/dist/${Math.round(radiusNm)}`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+  const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
   if (!res.ok) throw new Error(`ADSB.lol HTTP ${res.status}`);
   const json = await res.json();
   if (json.error) throw new Error(`ADSB.lol: ${json.error}`);
   const ac = json.ac || json.aircraft || [];
   return ac.map(_normalizeAdsbLol).filter(a => a.lat != null && a.lon != null);
-}
-
-async function _fetchOpenSky(lat, lon, radiusNm) {
-  const nmToLat = radiusNm / 60;
-  const nmToLon = radiusNm / (60 * Math.cos(lat * Math.PI / 180));
-  const lamin = lat - nmToLat, lamax = lat + nmToLat;
-  const lomin = lon - nmToLon, lomax = lon + nmToLon;
-  const url = `https://opensky-network.org/api/states/all?lamin=${lamin}&lomin=${lomin}&lamax=${lamax}&lomax=${lomax}`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(12000) });
-  if (!res.ok) throw new Error(`OpenSky HTTP ${res.status}`);
-  const json = await res.json();
-  const states = json.states || [];
-  return states.map(_normalizeOpenSky).filter(a => a.lat != null && a.lon != null);
 }
 
 function _normalizeAdsbLol(ac) {
@@ -125,25 +107,6 @@ function _normalizeAdsbLol(ac) {
   };
 }
 
-function _normalizeOpenSky(state) {
-  // state = [icao24, callsign, origin_country, time_pos, last_contact, lon, lat, baro_alt, on_ground, velocity, true_track, vert_rate, sensors, geo_alt, squawk, spi, pos_source]
-  const altM = state[7] ?? state[13];
-  return {
-    hex: (state[0] || '').toLowerCase(),
-    callsign: (state[1] || '').trim() || null,
-    lat: state[6],
-    lon: state[5],
-    altFt: altM != null ? altM * 3.28084 : null,
-    speedKts: state[9] != null ? state[9] * 1.94384 : null,
-    headingDeg: state[10],
-    vertRateFpm: state[11] != null ? state[11] * 196.85 : null,
-    onGround: state[8] === true,
-    typeCode: null,
-    originCountry: state[2] || null,
-    lastSeen: state[4] || Math.floor(Date.now() / 1000),
-    registration: null,
-  };
-}
 
 /**
  * Fetch route info for a callsign from adsbdb.com.
