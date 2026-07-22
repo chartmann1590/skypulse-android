@@ -1,0 +1,160 @@
+name: Publish to Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_play_publish:
+        description: 'Type "publish" to confirm submission to Google Play production'
+        required: true
+        default: ''
+      release_notes:
+        description: 'Release notes (optional; uses recent commits if empty)'
+        required: false
+        default: ''
+
+jobs:
+  publish:
+    name: Build & publish to Google Play
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    timeout-minutes: 60
+
+    steps:
+      - name: Check confirmation
+        if: github.event.inputs.confirm_play_publish != 'publish'
+        run: |
+          echo "::error::You must type 'publish' in confirm_play_publish to proceed."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Bump versionCode and commit
+        id: ver
+        run: |
+          git config core.fileMode false
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          CURRENT=$(grep -oP 'versionCode = \K[0-9]+' app/build.gradle.kts)
+          NEXT=$((CURRENT + 1))
+          sed -i "s/versionCode = ${CURRENT}/versionCode = ${NEXT}/" app/build.gradle.kts
+          NAME=$(grep -oP 'versionName = "\K[^"]+' app/build.gradle.kts)
+          echo "code=${NEXT}" >> "$GITHUB_OUTPUT"
+          echo "name=${NAME}" >> "$GITHUB_OUTPUT"
+          git commit -m "chore: bump versionCode to ${NEXT} for Play Store release [skip ci]" app/build.gradle.kts
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "push rejected (attempt ${attempt}); rebasing onto latest main..."
+            git pull --rebase origin main
+            sleep $((RANDOM % 4 + 2))
+          done
+          echo "Failed to push versionCode bump after 5 attempts" >&2
+          exit 1
+
+      - name: Write local.properties from secrets (enables real ads and feedback)
+        run: |
+          cat > local.properties <<EOF
+          ADMOB_APP_ID=${{ secrets.ADMOB_APP_ID }}
+          ADMOB_BANNER_ID=${{ secrets.ADMOB_BANNER_ID }}
+          ADMOB_INTERSTITIAL_ID=${{ secrets.ADMOB_INTERSTITIAL_ID }}
+          ADMOB_REWARDED_ID=${{ secrets.ADMOB_REWARDED_ID }}
+          KEYSTORE_FILE=keystore.jks
+          KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+          github.api.token=${{ secrets.GH_API_TOKEN }}
+          github.repo.owner=${{ secrets.GH_REPO_OWNER }}
+          github.repo.name=${{ secrets.GH_REPO_NAME }}
+          EOF
+
+      - name: Decode release keystore
+        run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+
+      - name: Write google-services.json from secret
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          value = os.environ["GOOGLE_SERVICES_JSON"].strip()
+          if value.startswith("{"):
+              config = value
+          else:
+              config = base64.b64decode(value).decode("utf-8")
+          json.loads(config)
+          Path("app/google-services.json").write_text(config)
+          PY
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --stacktrace
+
+      - name: Run lint
+        run: ./gradlew lintRelease --stacktrace
+
+      - name: Build signed release AAB
+        run: ./gradlew bundleRelease --stacktrace
+
+      - name: Generate release notes
+        run: |
+          WHATSNEW_DIR="distribution/whatsnew"
+          mkdir -p "${WHATSNEW_DIR}"
+          NOTES="${{ github.event.inputs.release_notes }}"
+          if [ -n "$NOTES" ]; then
+            printf '%s\n' "$NOTES" > "${WHATSNEW_DIR}/whatsnew-en-US"
+          elif git describe --tags --abbrev=0 HEAD^ 2>/dev/null; then
+            PREV_TAG="$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null)"
+            git log "${PREV_TAG}..HEAD" --pretty=format:'- %s' > "${WHATSNEW_DIR}/whatsnew-en-US"
+          else
+            printf '%s\n' "Bug fixes and performance improvements." > "${WHATSNEW_DIR}/whatsnew-en-US"
+          fi
+          echo "Generated whatsnew-en-US:"
+          cat "${WHATSNEW_DIR}/whatsnew-en-US"
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Verify service account key
+        run: |
+          if [ -z "$PLAY_JSON" ]; then
+            echo "::error::GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is missing."
+            exit 1
+          fi
+          echo "Service account key present."
+        env:
+          PLAY_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+
+      - name: Publish to Google Play
+        uses: r0adkll/upload-google-play@v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.charles.skypulse.app
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: production
+          status: completed
+          whatsNewDirectory: distribution/whatsnew
+
+      - name: Clean up secrets
+        if: always()
+        run: rm -f keystore.jks local.properties app/google-services.json
