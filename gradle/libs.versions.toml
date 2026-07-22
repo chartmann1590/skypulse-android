@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.1"
+agp = "9.3.0"
 # Kotlin pinned to 2.3.21 (not 2.4.0): CodeQL only supports Kotlin < 2.3.30, and this is the
 # version Dependabot validated against ksp 2.3.9.
 kotlin = "2.3.21"
