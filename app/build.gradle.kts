@@ -188,6 +188,7 @@ dependencies {
 
     // Ads (AdMob) + Google UMP consent
     implementation(libs.play.services.ads)
+    implementation(libs.play.review.ktx)
     implementation(libs.user.messaging.platform)
 
     // Tests

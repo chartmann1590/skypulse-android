@@ -1,5 +1,7 @@
 package com.charles.skypulse.app.ui.screens.map
 
+import android.app.Activity
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +37,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.charles.skypulse.app.domain.model.DataSource
 import com.charles.skypulse.app.domain.util.FormatUtils
+import com.charles.skypulse.app.review.ReviewPrompter
 import com.charles.skypulse.app.ui.components.AircraftListItem
 import com.charles.skypulse.app.ui.components.StatusBadge
 import com.charles.skypulse.app.ui.screens.rewards.RewardsChip
@@ -66,6 +69,13 @@ fun HomeMapScreen(
     LaunchedEffect(sharedFlightId) {
         if (!sharedFlightId.isNullOrBlank()) {
             viewModel.openSharedFlight(sharedFlightId)
+        }
+    }
+
+    // Tapping an aircraft for live details is the app's core "aha" moment.
+    LaunchedEffect(selected) {
+        if (selected != null) {
+            (context as? Activity)?.let { ReviewPrompter.maybeRequestReview(it) }
         }
     }
 
