@@ -7,7 +7,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.charles.skypulse.app.BuildConfig
 import com.charles.skypulse.app.data.remote.CreateIssueRequest
 import com.charles.skypulse.app.data.remote.GitHubApiService
 import com.charles.skypulse.app.data.remote.GitHubCommentDto
@@ -56,13 +55,7 @@ class FeedbackRepositoryImpl @Inject constructor(
             val base64Content = Base64.encodeToString(screenshotBytes, Base64.NO_WRAP)
             try {
                 val uploadResponse = apiService.uploadAsset(
-                    owner = BuildConfig.GITHUB_REPO_OWNER,
-                    repo = BuildConfig.GITHUB_REPO_NAME,
-                    filename = fileName,
-                    request = UploadAssetRequest(
-                        message = "Upload feedback screenshot: $fileName",
-                        content = base64Content
-                    )
+                    UploadAssetRequest(filename = fileName, contentBase64 = base64Content)
                 )
                 val imageUrl = uploadResponse.content.download_url
                 issueBody += "\n\n![Screenshot]($imageUrl)"
@@ -78,8 +71,6 @@ class FeedbackRepositoryImpl @Inject constructor(
 
         // 3. Create issue on GitHub
         val issueDto = apiService.createIssue(
-            owner = BuildConfig.GITHUB_REPO_OWNER,
-            repo = BuildConfig.GITHUB_REPO_NAME,
             request = CreateIssueRequest(title = title, body = issueBody)
         )
 
@@ -101,8 +92,6 @@ class FeedbackRepositoryImpl @Inject constructor(
 
     override suspend fun getComments(number: Int): List<GitHubCommentDto> {
         return apiService.getComments(
-            owner = BuildConfig.GITHUB_REPO_OWNER,
-            repo = BuildConfig.GITHUB_REPO_NAME,
             number = number
         )
     }
@@ -122,13 +111,7 @@ class FeedbackRepositoryImpl @Inject constructor(
             val base64Content = Base64.encodeToString(screenshotBytes, Base64.NO_WRAP)
             try {
                 val uploadResponse = apiService.uploadAsset(
-                    owner = BuildConfig.GITHUB_REPO_OWNER,
-                    repo = BuildConfig.GITHUB_REPO_NAME,
-                    filename = fileName,
-                    request = UploadAssetRequest(
-                        message = "Upload comment screenshot: $fileName",
-                        content = base64Content
-                    )
+                    UploadAssetRequest(filename = fileName, contentBase64 = base64Content)
                 )
                 val imageUrl = uploadResponse.content.download_url
                 commentBody += "\n\n![Screenshot]($imageUrl)"
@@ -138,8 +121,6 @@ class FeedbackRepositoryImpl @Inject constructor(
         }
 
         return apiService.postComment(
-            owner = BuildConfig.GITHUB_REPO_OWNER,
-            repo = BuildConfig.GITHUB_REPO_NAME,
             number = number,
             request = PostCommentRequest(body = commentBody)
         )
@@ -152,8 +133,6 @@ class FeedbackRepositoryImpl @Inject constructor(
         val updatedList = currentList.map { report ->
             try {
                 val liveIssue = apiService.getIssue(
-                    owner = BuildConfig.GITHUB_REPO_OWNER,
-                    repo = BuildConfig.GITHUB_REPO_NAME,
                     number = report.number
                 )
                 report.copy(status = liveIssue.state)

@@ -12,7 +12,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.CertificatePinner
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -125,31 +124,20 @@ object NetworkModule {
     fun provideFr24Api(@Fr24Retrofit retrofit: Retrofit): Fr24Api =
         retrofit.create(Fr24Api::class.java)
 
+    // Talks to the cloudflare-worker/ feedback relay, not api.github.com directly — the
+    // Worker holds the GitHub token as a server-side secret and hardcodes this app's own
+    // repo, so no owner/repo/credential ever needs to travel through this app. Previously
+    // embedded BuildConfig.GITHUB_API_TOKEN client-side as a Bearer header (with
+    // certificate pinning to api.github.com's cert, no longer applicable to the Worker's
+    // domain), which shipped a real repo-write PAT in every release build (extractable
+    // from the APK). See cloudflare-worker/src/index.ts.
     @Provides
     @Singleton
     @GitHubRetrofit
     fun provideGitHubRetrofit(client: OkHttpClient, json: Json): Retrofit {
-        // Certificate pinning: Sectigo intermediate (survives leaf rotation) + current leaf backup.
-        // Pins match network_security_config.xml — update both when the intermediate rotates.
-        val githubPinner = CertificatePinner.Builder()
-            .add("api.github.com", "sha256/ZSagvDzjltLkewXEBuDxIzpW/dpVw1Juvvmd0hhkzdY=") // intermediate
-            .add("api.github.com", "sha256/QVnLDkTvhX8bfBbaP6XeqWLCOja893s79lYfjQc/hWI=") // leaf backup
-            .build()
-        val githubClient = client.newBuilder()
-            .certificatePinner(githubPinner)
-            .addInterceptor { chain ->
-                val original = chain.request()
-                val request = original.newBuilder()
-                    .header("Authorization", "Bearer ${com.charles.skypulse.app.BuildConfig.GITHUB_API_TOKEN}")
-                    .header("Accept", "application/vnd.github+json")
-                    .header("X-GitHub-Api-Version", "2022-11-28")
-                    .build()
-                chain.proceed(request)
-            }
-            .build()
         return Retrofit.Builder()
-            .baseUrl("https://api.github.com/")
-            .client(githubClient)
+            .baseUrl("https://skypulse-github-feedback.charles-h-hartmann1.workers.dev/")
+            .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }

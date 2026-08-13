@@ -8,44 +8,29 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
+/**
+ * Talks to the cloudflare-worker/ feedback relay, not api.github.com directly. See
+ * NetworkModule.provideGitHubRetrofit and cloudflare-worker/src/index.ts.
+ */
 interface GitHubApiService {
 
-    @POST("repos/{owner}/{repo}/issues")
-    suspend fun createIssue(
-        @Path("owner") owner: String,
-        @Path("repo") repo: String,
-        @Body request: CreateIssueRequest
-    ): GitHubIssueDto
+    @POST("issue")
+    suspend fun createIssue(@Body request: CreateIssueRequest): GitHubIssueDto
 
-    @GET("repos/{owner}/{repo}/issues/{number}")
-    suspend fun getIssue(
-        @Path("owner") owner: String,
-        @Path("repo") repo: String,
-        @Path("number") number: Int
-    ): GitHubIssueDto
+    @GET("issue/{number}")
+    suspend fun getIssue(@Path("number") number: Int): GitHubIssueDto
 
-    @GET("repos/{owner}/{repo}/issues/{number}/comments")
-    suspend fun getComments(
-        @Path("owner") owner: String,
-        @Path("repo") repo: String,
-        @Path("number") number: Int
-    ): List<GitHubCommentDto>
+    @GET("issue/{number}/comments")
+    suspend fun getComments(@Path("number") number: Int): List<GitHubCommentDto>
 
-    @POST("repos/{owner}/{repo}/issues/{number}/comments")
+    @POST("issue/{number}/comments")
     suspend fun postComment(
-        @Path("owner") owner: String,
-        @Path("repo") repo: String,
         @Path("number") number: Int,
         @Body request: PostCommentRequest
     ): GitHubCommentDto
 
-    @PUT("repos/{owner}/{repo}/contents/feedback-assets/{filename}")
-    suspend fun uploadAsset(
-        @Path("owner") owner: String,
-        @Path("repo") repo: String,
-        @Path("filename") filename: String,
-        @Body request: UploadAssetRequest
-    ): UploadAssetResponse
+    @POST("upload-image")
+    suspend fun uploadAsset(@Body request: UploadAssetRequest): UploadAssetResponse
 }
 
 @Serializable
@@ -61,8 +46,8 @@ data class PostCommentRequest(
 
 @Serializable
 data class UploadAssetRequest(
-    val message: String,
-    val content: String // Base64-encoded file content
+    val filename: String,
+    val contentBase64: String // Base64-encoded file content
 )
 
 @Serializable
