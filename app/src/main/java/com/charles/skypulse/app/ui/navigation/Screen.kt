@@ -27,6 +27,7 @@ object Routes {
     const val PRIVACY = "privacy"
     const val PROFILE = "profile"
     const val REWARDS = "rewards"
+    const val MORE_APPS = "more_apps"
 }
 
 /** Bottom navigation destinations (the five primary tabs). */

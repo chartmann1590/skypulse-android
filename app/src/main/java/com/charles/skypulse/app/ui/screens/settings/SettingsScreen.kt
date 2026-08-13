@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.Wifi
@@ -56,6 +57,7 @@ fun SettingsScreen(
     onOpenProfile: () -> Unit,
     onOpenPrivacy: () -> Unit,
     onOpenRewards: () -> Unit,
+    onOpenMoreApps: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
@@ -169,6 +171,21 @@ fun SettingsScreen(
                     }
                 }
                 GhostButton("Open profile", onClick = onOpenProfile, modifier = Modifier.fillMaxWidth())
+            }
+
+            SettingsCard {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(Icons.Filled.Apps, null, tint = SkyColors.PrimaryFixedDim)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("More Apps", style = SkyType.TitleMd, color = SkyColors.OnSurface)
+                        Text(
+                            "Check out our other privacy-first apps.",
+                            style = SkyType.LabelSm,
+                            color = SkyColors.OnSurfaceVariant,
+                        )
+                    }
+                }
+                GhostButton("More apps from this developer", onClick = onOpenMoreApps, modifier = Modifier.fillMaxWidth())
             }
 
             // Privacy

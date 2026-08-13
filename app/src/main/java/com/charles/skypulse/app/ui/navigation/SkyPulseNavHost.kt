@@ -139,10 +139,14 @@ fun SkyPulseNavHost(
                     onOpenProfile = { navController.navigate(Routes.PROFILE) },
                     onOpenPrivacy = { navController.navigate(Routes.PRIVACY) },
                     onOpenRewards = { navController.navigate(Routes.REWARDS) },
+                    onOpenMoreApps = { navController.navigate(Routes.MORE_APPS) },
                 )
             }
             composable(Routes.PRIVACY) {
                 PrivacyScreen(onBack = { navController.popBackStack() })
+            }
+            composable(Routes.MORE_APPS) {
+                com.charles.skypulse.app.ui.screens.moreapps.MoreAppsScreen(onBack = { navController.popBackStack() })
             }
             composable(Routes.PROFILE) {
                 ProfileScreen(
