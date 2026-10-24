@@ -2,6 +2,7 @@ package com.charles.skypulse.app.ui.screens.map
 
 import android.app.Activity
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Tune
@@ -28,10 +31,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,6 +51,7 @@ import com.charles.skypulse.app.ui.screens.rewards.RewardsChip
 import com.charles.skypulse.app.ui.theme.SkyColors
 import com.charles.skypulse.app.ui.theme.SkyType
 import com.charles.skypulse.app.ui.theme.glassPanel
+import com.charles.skypulse.app.ui.util.isShortScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,6 +72,8 @@ fun HomeMapScreen(
     val focusShared by viewModel.focusShared.collectAsStateWithLifecycle()
     val isSharing by viewModel.isSharing.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    // Short phones (e.g. 5" 360x640 dp) get a compact layout so the map stays visible.
+    val compact = isShortScreen()
 
     // Open a shared flight when arriving via deep link.
     LaunchedEffect(sharedFlightId) {
@@ -134,17 +144,33 @@ fun HomeMapScreen(
             )
         }
 
-        // Right-side FABs.
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalAlignment = Alignment.End,
-        ) {
-            RewardsChip(onClick = onOpenRewards)
-            MapFab(Icons.Filled.MyLocation, "Recenter", viewModel::recenter)
-            MapFab(Icons.Filled.Tune, "Settings", onOpenSettings)
+        // Right-side FABs. On short screens they sit in a row under the search pill so they never
+        // cover the summary card; taller screens keep the original centered column.
+        if (compact) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .statusBarsPadding()
+                    .padding(top = 76.dp, end = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                RewardsChip(onClick = onOpenRewards)
+                MapFab(Icons.Filled.MyLocation, "Recenter", viewModel::recenter)
+                MapFab(Icons.Filled.Tune, "Settings", onOpenSettings)
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.End,
+            ) {
+                RewardsChip(onClick = onOpenRewards)
+                MapFab(Icons.Filled.MyLocation, "Recenter", viewModel::recenter)
+                MapFab(Icons.Filled.Tune, "Settings", onOpenSettings)
+            }
         }
 
         // Bottom summary card.
@@ -158,9 +184,10 @@ fun HomeMapScreen(
             distanceUnit = settings.distanceUnit,
             speedUnit = settings.speedUnit,
             onClosestClick = { ac -> viewModel.select(ac) },
+            compact = compact,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(16.dp),
+                .padding(if (compact) 12.dp else 16.dp),
         )
     }
 
@@ -205,24 +232,81 @@ private fun SummaryCard(
     distanceUnit: com.charles.skypulse.app.domain.model.DistanceUnit,
     speedUnit: com.charles.skypulse.app.domain.model.SpeedUnit,
     onClosestClick: (com.charles.skypulse.app.domain.model.Aircraft) -> Unit,
+    compact: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(24.dp)
+    // On short screens the card starts collapsed to one row; the choice survives rotation and
+    // process death. Taller screens always show the full card.
+    var expanded by rememberSaveable(compact) { mutableStateOf(!compact) }
+    val statusLabel = when {
+        isOffline -> "Cached"
+        source == DataSource.OPENSKY -> "OpenSky • ${FormatUtils.relativeTime(lastUpdated?.div(1000))}"
+        else -> "Updated ${FormatUtils.relativeTime(lastUpdated?.div(1000))}"
+    }
+    val accent = if (isOffline) SkyColors.AlertRed else SkyColors.PrimaryFixedDim
+
+    if (compact && !expanded) {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(shape)
+                .glassPanel(shape, fill = SkyColors.SurfaceContainerLow.copy(alpha = 0.75f))
+                .clickable { expanded = true }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text("$count planes", style = SkyType.TitleMd, color = SkyColors.PrimaryFixedDim, maxLines = 1)
+            val detail = buildString {
+                if (closest != null) {
+                    append("Closest ")
+                    append(closest.displayName)
+                    append(" ")
+                    append(FormatUtils.distanceFromNm(closest.distanceNm, distanceUnit))
+                    append(" • ")
+                }
+                append(statusLabel)
+            }
+            Text(
+                detail,
+                style = SkyType.BodyMd,
+                color = if (isOffline) SkyColors.AlertRed else SkyColors.OnSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
+            Icon(Icons.Filled.KeyboardArrowUp, "Show details", tint = accent, modifier = Modifier.size(24.dp))
+        }
+        return
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .animateContentSize()
             .clip(shape)
             .glassPanel(shape, fill = SkyColors.SurfaceContainerLow.copy(alpha = 0.75f))
-            .padding(20.dp),
+            .padding(if (compact) 16.dp else 20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (compact) Modifier.clickable { expanded = false } else Modifier),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text("Aircraft Nearby", style = SkyType.TitleMd, color = SkyColors.OnSurface)
-            Text("$count planes", style = SkyType.DataLg, color = SkyColors.PrimaryFixedDim)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text("$count planes", style = SkyType.DataLg, color = SkyColors.PrimaryFixedDim)
+                if (compact) {
+                    Icon(Icons.Filled.KeyboardArrowDown, "Hide details", tint = accent, modifier = Modifier.size(24.dp))
+                }
+            }
         }
         if (closest != null) {
             AircraftListItem(
@@ -231,7 +315,7 @@ private fun SummaryCard(
                 altitudeUnit = altitudeUnit,
                 speedUnit = speedUnit,
                 onClick = { onClosestClick(closest) },
-                accent = if (isOffline) SkyColors.AlertRed else SkyColors.PrimaryFixedDim,
+                accent = accent,
             )
         }
         Row(
@@ -239,14 +323,9 @@ private fun SummaryCard(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val label = when {
-                isOffline -> "Cached"
-                source == DataSource.OPENSKY -> "OpenSky • ${FormatUtils.relativeTime(lastUpdated?.div(1000))}"
-                else -> "Updated ${FormatUtils.relativeTime(lastUpdated?.div(1000))}"
-            }
             StatusBadge(
-                text = label,
-                dotColor = if (isOffline) SkyColors.AlertRed else SkyColors.PrimaryFixedDim,
+                text = statusLabel,
+                dotColor = accent,
                 textColor = if (isOffline) SkyColors.AlertRed else SkyColors.OnSurfaceVariant,
             )
         }
