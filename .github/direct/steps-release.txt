@@ -43,11 +43,21 @@ shot 13-saved
 tap (?i)^Profile$
 wait 4
 adclose
+back
+wait 3
+adclose
+tap (?i)^Profile$
+wait 4
+adclose
 shot 14-profile
 swipeup
 swipeup
 shot 20-profile-bottom
 tap (?i)more apps|other apps|our apps
 wait 4
+adclose
 shot 21-more-apps
+tap (?i)^(Driftfeed|Nightsay|Path|Psalmwell|Flashlight|Sticky Notes|Pocket Assistant|MeshTalk|LiveCaptionN)
+wait 6
+shot 22-more-apps-tapped
 back
