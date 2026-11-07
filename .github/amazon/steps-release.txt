@@ -3,25 +3,51 @@ wait 15
 shot 01-launch
 swipeup
 swipeup
-taploop (?i)^(next|next step|continue|get started|skip|allow|ok|accept|agree|got it|start|i agree|not now|later|maybe later|no thanks|done|finish tutorial|english)$
+taploop (?i)^(next|next step|continue|get started|skip|skip for now|allow|ok|accept|agree|got it|start|i agree|not now|later|maybe later|no thanks|done|finish tutorial|english|while using the app|only this time)$
+adclose
 wait 3
 shot 02-after-onboarding
 swipeup
 swipeup
-taploop (?i)^(next|next step|continue|get started|skip|allow|ok|accept|agree|got it|start|i agree|not now|later|maybe later|no thanks|done|finish tutorial|english)$
+taploop (?i)^(next|next step|continue|get started|skip|skip for now|allow|ok|accept|agree|got it|start|i agree|not now|later|maybe later|no thanks|done|finish tutorial|english|while using the app|only this time)$
+adclose
+adclose
 shot 03-main
 swipeup
 shot 04-scrolled
 tap (?i)^settings$
 wait 4
+adclose
 shot 05-settings
 swipeup
 swipeup
 shot 06-settings-bottom
+back
+wait 3
+tap (?i)^Nearby$
+wait 4
+adclose
+shot 10-nearby
+tap (?i)^Airports$
+wait 4
+adclose
+shot 11-airports
+tap (?i)^Alerts$
+wait 4
+adclose
+shot 12-alerts
+tap (?i)^Saved$
+wait 4
+adclose
+shot 13-saved
+tap (?i)^Profile$
+wait 4
+adclose
+shot 14-profile
+swipeup
+swipeup
+shot 20-profile-bottom
 tap (?i)more apps|other apps|our apps
 wait 4
-shot 07-more-apps
+shot 21-more-apps
 back
-back
-wait 2
-shot 08-back-main
