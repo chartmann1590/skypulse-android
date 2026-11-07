@@ -1,0 +1,127 @@
+name: Amazon Appstore build + emulator test
+# Amazon Appstore (Fire) build of this app: same code, built with -Pstore=amazon (no Google Play
+# links, no Play in-app review prompt). Run on an emulator without Google Play services (like Fire).
+# Branch builds only make a DRAFT release; nothing is uploaded to any store.
+on:
+  push:
+    branches: [amazon]
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: amazon-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  amazon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v7
+    - name: Set up JDK 17
+      uses: actions/setup-java@v6
+      with:
+        distribution: temurin
+        java-version: '17'
+    - name: Set up Gradle
+      uses: gradle/actions/setup-gradle@v6
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
+    - name: Write local.properties from secrets (enables real ads and feedback)
+      run: 'cat > local.properties <<EOF
+
+        ADMOB_APP_ID=${{ secrets.ADMOB_APP_ID }}
+
+        ADMOB_BANNER_ID=${{ secrets.ADMOB_BANNER_ID }}
+
+        ADMOB_INTERSTITIAL_ID=${{ secrets.ADMOB_INTERSTITIAL_ID }}
+
+        ADMOB_REWARDED_ID=${{ secrets.ADMOB_REWARDED_ID }}
+
+        KEYSTORE_FILE=keystore.jks
+
+        KEYSTORE_PASSWORD=${{ secrets.KEYSTORE_PASSWORD }}
+
+        KEY_ALIAS=${{ secrets.KEY_ALIAS }}
+
+        KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}
+
+        EOF
+
+        '
+    - name: Decode release keystore
+      run: printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > keystore.jks
+    - name: Write google-services.json from secret
+      env:
+        GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+      run: "python - <<'PY'\nimport base64\nimport json\nimport os\nfrom pathlib import Path\n\nvalue = os.environ[\"GOOGLE_SERVICES_JSON\"].strip()\nif value.startswith(\"{\"):\n    config = value\nelse:\n    config = base64.b64decode(value).decode(\"utf-8\")\njson.loads(config)\nPath(\"app/google-services.json\").write_text(config)\nPY\n"
+    - name: Validate Firebase auth config
+      run: 'python - <<''PY''
+
+        import json
+
+        from pathlib import Path
+
+
+        config = json.loads(Path("app/google-services.json").read_text())
+
+        oauth_clients = config["client"][0].get("oauth_client", [])
+
+        assert any(client.get("client_type") == 1 for client in oauth_clients), "missing Android OAuth client"
+
+        assert any(client.get("client_type") == 3 for client in oauth_clients), "missing web OAuth client"
+
+        PY
+
+        '
+    - name: Build amazon APKs (store=amazon)
+      env:
+        APP_VERSION_CODE: ${{ github.run_number }}
+      run: './gradlew assembleRelease -Pstore=amazon  --stacktrace
+
+        mkdir -p amz-apk
+
+
+        cp "$(ls app/build/outputs/apk/release/*.apk | grep -v unsigned | head -1 || ls app/build/outputs/apk/release/*.apk | head -1)" amz-apk/SkyPulse-amazon-release.apk
+
+        ls -la amz-apk
+
+        BT=$ANDROID_HOME/build-tools/$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
+
+        $BT/apksigner verify --print-certs amz-apk/SkyPulse-amazon-release.apk | head -3 || true
+
+        $BT/aapt2 dump badging amz-apk/SkyPulse-amazon-release.apk | head -3 || true
+
+        echo "--- Play Store URL strings left in the amazon release dex:"; unzip -p amz-apk/SkyPulse-amazon-release.apk ''classes*.dex'' | strings | grep -E "play\.google\.com/store|market://" | head || true
+
+        '
+    - name: Enable KVM
+      run: 'echo ''KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"'' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+
+        sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+
+        '
+    - name: Emulator test (no Google Play services, like Fire)
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        api-level: 30
+        target: default
+        arch: x86_64
+        ram-size: 3072M
+        disk-size: 4096M
+        emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+        disable-animations: true
+        script: bash .github/amazon/run-tests.sh
+    - name: Upload test results to Tab's private drop
+      if: always()
+      env:
+        DROP_KEY: ${{ secrets.DROP_KEY }}
+      run: bash .github/amazon/amazon-upload.sh /tmp/amz-out amz_SkyPulse_r${{ github.run_number }}
+    - name: Draft release with the amazon APK (not published)
+      if: success()
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: amazon-${{ github.run_number }}
+        name: Amazon build ${{ github.run_number }} (${{ github.sha }})
+        draft: true
+        files: amz-apk/SkyPulse-amazon-release.apk
