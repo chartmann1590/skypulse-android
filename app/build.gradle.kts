@@ -39,6 +39,9 @@ android {
     compileSdk = 37
 
     defaultConfig {
+        // Store this build is for: "play" (default) or "direct" (./gradlew ... -Pstore=direct).
+        // Direct (GitHub / charleshartmann.com) builds drop Google Play links and the Play in-app review prompt.
+        buildConfigField("String", "STORE", "\"${(project.findProperty("store") as String?) ?: "play"}\"")
         applicationId = "com.charles.skypulse.app"
         minSdk = 26
         targetSdk = 37

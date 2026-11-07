@@ -86,7 +86,7 @@ fun MoreAppsScreen(onBack: () -> Unit) {
                 GlassCard(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { uriHandler.openUri("https://play.google.com/store/apps/details?id=${app.packageName}") },
+                        .clickable { uriHandler.openUri((if (com.charles.skypulse.app.BuildConfig.STORE == "direct") "https://charleshartmann.com/apps/" else "https://play.google.com/store/apps/details?id=${app.packageName}")) },
                 ) {
                     Column(Modifier.fillMaxWidth()) {
                         Text(app.name, style = SkyType.TitleMd, color = SkyColors.OnSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
