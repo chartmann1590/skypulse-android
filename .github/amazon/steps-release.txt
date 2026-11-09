@@ -22,19 +22,28 @@ shot 05-settings
 swipeup
 swipeup
 shot 06-settings-bottom
-swipeup
-swipeup
-swipeup
-shot 07-settings-end
-scrollto (?i)^privacy
+# swipe in the middle of the screen (the banner sits at the bottom)
+sh input swipe 600 1300 600 400 400
+sh input swipe 600 1300 600 400 400
+wait 1
+shot 07-settings-mid
+sh input swipe 600 1300 600 400 400
+sh input swipe 600 1300 600 400 400
+sh input swipe 600 1300 600 400 400
+wait 1
+shot 07b-settings-end
+tap (?i)^read privacy details$
 wait 3
 shot 08-privacy
-swipeup
-swipeup
+sh input swipe 600 1300 600 400 400
+sh input swipe 600 1300 600 400 400
+sh input swipe 600 1300 600 400 400
+wait 1
 shot 09-privacy-bottom
 back
 wait 2
-back
+tap (?i)^back$
+wait 3
 wait 3
 tap (?i)^Nearby$
 wait 4
@@ -56,8 +65,9 @@ tap (?i)^Profile$
 wait 4
 adclose
 shot 14-profile
-swipeup
-swipeup
+sh input swipe 600 1300 600 400 400
+sh input swipe 600 1300 600 400 400
+wait 1
 shot 20-profile-bottom
 tap (?i)more apps|other apps|our apps
 wait 4

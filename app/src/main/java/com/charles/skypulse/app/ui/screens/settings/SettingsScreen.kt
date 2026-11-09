@@ -164,7 +164,7 @@ fun SettingsScreen(
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Profile", style = SkyType.TitleMd, color = SkyColors.OnSurface)
                         Text(
-                            "Sign in with Google or an email account.",
+                            if (com.charles.skypulse.app.BuildConfig.STORE == "amazon") "Sign in with an email account." else "Sign in with Google or an email account.",
                             style = SkyType.LabelSm,
                             color = SkyColors.OnSurfaceVariant,
                         )
@@ -282,7 +282,8 @@ fun SettingsScreen(
                     color = SkyColors.OnSurfaceVariant,
                 )
                 LinkRow("Visit the SkyPulse website") { uriHandler.openUri(WEBSITE_URL) }
-                LinkRow("☕ Buy me a coffee") { uriHandler.openUri(BMC_URL) }
+                // No outside-payment links in the Amazon Appstore build.
+                if (com.charles.skypulse.app.BuildConfig.STORE != "amazon") LinkRow("☕ Buy me a coffee") { uriHandler.openUri(BMC_URL) }
             }
 
             Column(
@@ -292,7 +293,7 @@ fun SettingsScreen(
             ) {
                 Text("SkyPulse", style = SkyType.TitleMd, color = SkyColors.OnSurface)
                 Text("Powered by open ADS-B data.", style = SkyType.LabelSm, color = SkyColors.OnSurfaceVariant)
-                Text("Version 1.0.0", style = SkyType.LabelSm, color = SkyColors.Outline, textAlign = TextAlign.Center)
+                Text("Version ${com.charles.skypulse.app.BuildConfig.VERSION_NAME}", style = SkyType.LabelSm, color = SkyColors.Outline, textAlign = TextAlign.Center)
             }
         }
     }

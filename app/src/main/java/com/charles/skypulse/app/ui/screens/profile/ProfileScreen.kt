@@ -197,11 +197,13 @@ private fun SignedOutProfile(
     ProfileCard {
         Text("Sign in to SkyPulse", style = SkyType.TitleMd, color = SkyColors.TextHigh)
         Text(
-            "Use Google or create an email account to keep your profile ready for synced features.",
+            if (com.charles.skypulse.app.BuildConfig.STORE == "amazon") "Create an email account to keep your profile ready for synced features."
+            else "Use Google or create an email account to keep your profile ready for synced features.",
             style = SkyType.BodyMd,
             color = SkyColors.OnSurfaceVariant,
         )
-        AuthButton(
+        // Google sign-in needs Google Play services, which Fire devices do not have: email only on Amazon.
+        if (com.charles.skypulse.app.BuildConfig.STORE != "amazon") AuthButton(
             text = "Continue with Google",
             enabled = !state.loading,
             leadingIcon = Icons.AutoMirrored.Filled.Login,

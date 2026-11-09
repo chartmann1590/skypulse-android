@@ -16,5 +16,10 @@ if grep -il -E "ad-free rewards|open rewards|watch an ad|rewards" $OUT/release-*
 else
   echo "REWARDS CHECK: PASS (no rewards entry on any walked screen)" | tee $OUT/rewards-check.txt
 fi
+if grep -il -E "continue with google|buy me a coffee" $OUT/release-*.txt > $OUT/gms-check.txt 2>/dev/null; then
+  echo "GMS/OUTSIDE-PAYMENT CHECK: FAIL (still visible in:)"; cat $OUT/gms-check.txt
+else
+  echo "GMS/OUTSIDE-PAYMENT CHECK: PASS (no Google sign-in or coffee link on any walked screen)" | tee $OUT/gms-check.txt
+fi
 ls -la $OUT | tail -60
 cat $OUT/*-fatal.txt 2>/dev/null | head -40
