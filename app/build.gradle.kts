@@ -45,8 +45,8 @@ android {
         applicationId = "com.charles.skypulse.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 45
-        versionName = "1.0.1"
+        versionCode = 46
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }

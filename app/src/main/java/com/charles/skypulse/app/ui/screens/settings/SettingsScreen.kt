@@ -142,8 +142,8 @@ fun SettingsScreen(
                 )
             }
 
-            // Ad-free rewards
-            SettingsCard {
+            // Ad-free rewards (not in the Amazon build: rewarded ads need Google Play services)
+            if (com.charles.skypulse.app.data.ads.RewardsAvailability.enabled) SettingsCard {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Icon(Icons.Filled.CardGiftcard, null, tint = SkyColors.PrimaryFixedDim)
                     Column(modifier = Modifier.weight(1f)) {

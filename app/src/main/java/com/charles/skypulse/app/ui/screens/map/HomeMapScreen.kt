@@ -155,7 +155,7 @@ fun HomeMapScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                RewardsChip(onClick = onOpenRewards)
+                if (com.charles.skypulse.app.data.ads.RewardsAvailability.enabled) RewardsChip(onClick = onOpenRewards)
                 MapFab(Icons.Filled.MyLocation, "Recenter", viewModel::recenter)
                 MapFab(Icons.Filled.Tune, "Settings", onOpenSettings)
             }
@@ -167,7 +167,7 @@ fun HomeMapScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.End,
             ) {
-                RewardsChip(onClick = onOpenRewards)
+                if (com.charles.skypulse.app.data.ads.RewardsAvailability.enabled) RewardsChip(onClick = onOpenRewards)
                 MapFab(Icons.Filled.MyLocation, "Recenter", viewModel::recenter)
                 MapFab(Icons.Filled.Tune, "Settings", onOpenSettings)
             }

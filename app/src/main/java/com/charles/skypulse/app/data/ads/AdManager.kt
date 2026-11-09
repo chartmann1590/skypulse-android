@@ -48,7 +48,7 @@ class AdManager @Inject constructor(
         if (!initialized.compareAndSet(false, true)) return
         MobileAds.initialize(context) {}
         loadInterstitial()
-        loadRewarded()
+        if (RewardsAvailability.enabled) loadRewarded()
     }
 
     private fun isAdFree(): Boolean =
@@ -93,7 +93,7 @@ class AdManager @Inject constructor(
     // ── Rewarded ──────────────────────────────────────────────────────────────
 
     private fun loadRewarded() {
-        if (rewarded != null) return
+        if (!RewardsAvailability.enabled || rewarded != null) return
         RewardedAd.load(
             context,
             AdConfig.rewardedId,

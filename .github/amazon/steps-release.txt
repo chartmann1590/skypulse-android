@@ -22,6 +22,18 @@ shot 05-settings
 swipeup
 swipeup
 shot 06-settings-bottom
+swipeup
+swipeup
+swipeup
+shot 07-settings-end
+scrollto (?i)^privacy
+wait 3
+shot 08-privacy
+swipeup
+swipeup
+shot 09-privacy-bottom
+back
+wait 2
 back
 wait 3
 tap (?i)^Nearby$

@@ -119,7 +119,17 @@ fun RewardsScreen(
                 onClick = {
                     if (ui.canEarn) {
                         context.findActivity()?.let { activity ->
-                            viewModel.watchAd(activity) { /* state updates reactively */ }
+                            viewModel.watchAd(activity) { earned ->
+                                // Credits update reactively; tell the user when no ad could be shown
+                                // instead of leaving the button looking dead.
+                                if (!earned) {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "No ad is available right now. Please try again in a minute.",
+                                        android.widget.Toast.LENGTH_LONG,
+                                    ).show()
+                                }
+                            }
                         }
                     }
                 },

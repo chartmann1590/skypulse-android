@@ -58,9 +58,9 @@ fun PrivacyScreen(onBack: () -> Unit) {
             )
             Section(
                 "Ads (Google AdMob)",
-                "SkyPulse is free and shows ads via Google AdMob (a banner, occasional full-screen ads, and optional rewarded ads). Google may use a device advertising identifier to serve and measure ads. On first launch you'll see a consent choice (Google's User Messaging Platform) where required by law; you can change it later. See Google's policies for how ad data is handled.",
+                "SkyPulse is free and shows ads via Google AdMob (a banner, occasional full-screen ads" + (if (com.charles.skypulse.app.data.ads.RewardsAvailability.enabled) ", and optional rewarded ads)." else ").") + " Google may use a device advertising identifier to serve and measure ads. On first launch you'll see a consent choice (Google's User Messaging Platform) where required by law; you can change it later. See Google's policies for how ad data is handled.",
             )
-            Section(
+            if (com.charles.skypulse.app.data.ads.RewardsAvailability.enabled) Section(
                 "Ad-free rewards",
                 "You can watch optional rewarded ads to earn credits and unlock ad-free time. Your credits and ad-free timer are stored only on your device and reset daily — they are not tied to any account or sent anywhere.",
             )

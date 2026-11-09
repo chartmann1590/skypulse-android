@@ -119,7 +119,7 @@ fun SkyPulseNavHost(
                 )
 
                 // First-open explanation of the ad-free rewards system.
-                if (showRewardsIntro) {
+                if (showRewardsIntro && com.charles.skypulse.app.data.ads.RewardsAvailability.enabled) {
                     RewardsIntroDialog(
                         onLearnMore = {
                             appViewModel.markRewardsIntroSeen()
