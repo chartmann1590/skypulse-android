@@ -30,13 +30,13 @@ jobs:
     - name: Write local.properties from secrets (enables real ads and feedback)
       run: 'cat > local.properties <<EOF
 
-        ADMOB_APP_ID=${{ secrets.ADMOB_APP_ID }}
+        ADMOB_APP_ID=ca-app-pub-8382831211800454~1261818530
 
-        ADMOB_BANNER_ID=${{ secrets.ADMOB_BANNER_ID }}
+        ADMOB_BANNER_ID=ca-app-pub-8382831211800454/8980847256
 
-        ADMOB_INTERSTITIAL_ID=${{ secrets.ADMOB_INTERSTITIAL_ID }}
+        ADMOB_INTERSTITIAL_ID=ca-app-pub-8382831211800454/5157152310
 
-        ADMOB_REWARDED_ID=${{ secrets.ADMOB_REWARDED_ID }}
+        ADMOB_REWARDED_ID=ca-app-pub-8382831211800454/2962233817
 
         KEYSTORE_FILE=keystore.jks
 
