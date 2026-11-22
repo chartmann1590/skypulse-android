@@ -23,6 +23,10 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
       - run: node --experimental-default-type=module --test tests/skypulse-account-deletion.test.js
       - name: Write google-services.json from secret
         env:
