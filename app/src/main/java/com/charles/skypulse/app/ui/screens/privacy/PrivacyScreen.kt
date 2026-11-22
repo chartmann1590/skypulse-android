@@ -37,36 +37,36 @@ fun PrivacyScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Section(
-                "No account required",
-                "SkyPulse never asks you to sign in or create an account. There is no user profile and no password.",
+                "Accounts and saved data",
+                "You can use basic flight tracking without an account. If you choose email or Google sign-in, Firebase Authentication processes account information such as your email address and account ID. When you are signed in, saved aircraft, airports and areas (including area labels and coordinates) are synced to Cloud Firestore under your account. Local alert rules and cached flight data are not part of that account sync.",
             )
             Section(
-                "Your data stays on your device",
-                "Saved aircraft, saved airports, saved areas, and alert rules are stored locally in an on-device database. They are never uploaded to a server by this app.",
+                "Location and live data",
+                "If you grant location permission, the app can use your device location to center the map and evaluate local alerts. Aviation and map services receive the requested area or coordinates and normal network information such as your IP address. A request for nearby aircraft or map tiles may reflect the area around your device. Flightradar24 and adsbdb receive aircraft-related route lookups.",
             )
             Section(
-                "Location",
-                "Your location is used only on-device to find aircraft and airports near you and to evaluate local alerts. It is not sent to any SkyPulse backend (there isn't one).",
+                "Public flight sharing",
+                "If you share a flight, the app stores a snapshot of the aircraft and related flight information in Cloud Firestore and creates a public link. It is not a live feed. The snapshot is associated with a Firebase account or anonymous app ID.",
             )
             Section(
-                "Open data sources",
-                "Live aircraft come from the free ADSB.lol API and, as a fallback, OpenSky Network's anonymous API. Airport and airline reference data is bundled from OpenFlights. These are public, open data sources and require no key or login.",
+                "Delete account and data",
+                "Open Profile, then Delete account and data to remove your SkyPulse sign-in, synced saved items, and associated share links in your browser. Deletion does not remove data stored only on this device or public feedback posted separately on GitHub.",
             )
             Section(
-                "Diagnostics (Firebase, free tier)",
-                "Anonymous crash reports (Crashlytics), aggregate non-personal usage analytics (Google Analytics for Firebase), and app performance metrics (Firebase Performance Monitoring) help improve the app. Remote Config delivers feature flags. Optional push (FCM) may be used for announcements. None of these require a login or collect personally identifying information.",
+                "Public feedback",
+                "If you post a report or comment from the app, GitHub receives the content. If you choose to attach a screenshot or system diagnostics, those can also appear publicly on GitHub. Do not include private information. System diagnostics are off by default in this version.",
             )
             Section(
-                "Ads (Google AdMob)",
-                "SkyPulse is free and shows ads via Google AdMob (a banner, occasional full-screen ads, and optional rewarded ads). Google may use a device advertising identifier to serve and measure ads. On first launch you'll see a consent choice (Google's User Messaging Platform) where required by law; you can change it later. See Google's policies for how ad data is handled.",
+                "Diagnostics and app services",
+                "Firebase services support app analytics, crash reports, performance measurements, configuration and push notifications. These services can process app usage, device and app identifiers, diagnostic information and push registration data. See Google’s Firebase privacy information for how it processes this data.",
             )
             Section(
-                "Ad-free rewards",
-                "You can watch optional rewarded ads to earn credits and unlock ad-free time. Your credits and ad-free timer are stored only on your device and reset daily — they are not tied to any account or sent anywhere.",
+                "Ads",
+                "AdMob serves banner, interstitial and optional rewarded ads. Google and its partners may process advertising identifiers, IP-based location, ad interactions and technical data to serve and measure ads. The app uses Google’s consent form where required. SkyPulse rewards and the ad-free timer are stored on your device.",
             )
             Section(
                 "Limits of free ADS-B data",
-                "Not every aircraft is guaranteed to appear. Coverage varies by area and time, data can be delayed or missing, and some military or private aircraft may be hidden or incomplete. Gate, boarding, and route status are not provided by free feeds.",
+                "Not every aircraft is guaranteed to appear. Coverage varies by area and time, data can be delayed or missing, and some aircraft may be hidden or incomplete. Free feeds may not provide reliable gate, boarding or route status.",
             )
         }
     }

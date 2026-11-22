@@ -106,6 +106,29 @@ fun ProfileScreen(
                 onSignUp = viewModel::createWithEmail,
                 onReset = viewModel::sendPasswordReset,
             )
+            ProfileCard {
+                Text("Account deletion", style = SkyType.TitleMd, color = SkyColors.TextHigh)
+                Text(
+                    "Permanently delete your SkyPulse account and its synced data in your browser.",
+                    style = SkyType.BodyMd,
+                    color = SkyColors.OnSurfaceVariant,
+                )
+                AuthButton(
+                    text = "Delete account and data",
+                    enabled = !state.loading,
+                    leadingIcon = Icons.Filled.OpenInBrowser,
+                    filled = false,
+                    onClick = {
+                        val page = Uri.parse("https://chartmann1590.github.io/skypulse-android/delete-account.html")
+                        val intent = Intent(Intent.ACTION_VIEW, page)
+                        try {
+                            context.startActivity(intent)
+                        } catch (_: android.content.ActivityNotFoundException) {
+                            android.widget.Toast.makeText(context, "Open this page in a web browser: $page", android.widget.Toast.LENGTH_LONG).show()
+                        }
+                    },
+                )
+            }
             WebAppCard(email = state.user?.email)
         }
     }

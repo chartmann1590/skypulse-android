@@ -18,7 +18,7 @@ import javax.inject.Singleton
  * Cloud Firestore (after an anonymous sign-in) and hands back a public link to the website
  * viewer; also reads a shared snapshot back when the app is opened from a share link.
  *
- * Stays entirely on the Firebase Spark (free) tier: anonymous auth + a single small document.
+ * Stays entirely on the Firebase Spark (free) tier: anonymous auth plus a snapshot and its private owner reference.
  */
 @Singleton
 class ShareRepository @Inject constructor(
@@ -39,7 +39,6 @@ class ShareRepository @Inject constructor(
 
         val data = HashMap<String, Any?>()
         data["schema"] = SCHEMA_VERSION
-        data["sharedBy"] = uid
         data["createdAt"] = FieldValue.serverTimestamp()
         // Aircraft snapshot
         data["callsign"] = ac.callsign
@@ -78,7 +77,12 @@ class ShareRepository @Inject constructor(
         }
 
         val doc = firestore.collection(COLLECTION).document()
-        doc.set(data).await()
+        val link = firestore.collection("users").document(uid)
+            .collection("shared_flight_refs").document(doc.id)
+        val batch = firestore.batch()
+        batch.set(doc, data)
+        batch.set(link, mapOf("createdAt" to FieldValue.serverTimestamp()))
+        batch.commit().await()
         return shareUrl(doc.id)
     }
 

@@ -22,7 +22,7 @@ import {
   getDocs,
   setDoc,
   deleteDoc,
-  addDoc,
+  writeBatch,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js';
 
@@ -179,10 +179,14 @@ export async function createSharedFlight(data) {
   if (!_auth.currentUser) {
     await signInAnonymously(_auth);
   }
-  const ref = await addDoc(collection(_db, 'shared_flights'), {
-    ...data,
-    createdAt: serverTimestamp(),
-  });
+  const uid = _auth.currentUser?.uid;
+  if (!uid) throw new Error('Sign-in required to share a flight.');
+  const ref = doc(collection(_db, 'shared_flights'));
+  const link = doc(_db, 'users', uid, 'shared_flight_refs', ref.id);
+  const batch = writeBatch(_db);
+  batch.set(ref, { ...data, createdAt: serverTimestamp() });
+  batch.set(link, { createdAt: serverTimestamp() });
+  await batch.commit();
   return ref.id;
 }
 
