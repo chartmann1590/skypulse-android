@@ -43,92 +43,81 @@
   </nav>
 
   <h1>Privacy Policy</h1>
-  <p class="updated">Last updated: June 2026 (ads &amp; analytics update)</p>
+  <p class="updated">Last updated: November 22, 2026</p>
 
   <div class="card">
-    <p><strong style="color:#fff">Short version:</strong> SkyPulse has no account and no login.
-    Your saved items and alert rules stay on your device. Your location is used only on your
-    device to find nearby aircraft/airports and to evaluate local alerts — it is never sent to a
-    SkyPulse server, because there isn't one.</p>
+    <p><strong style="color:#fff">Short version:</strong> Start tracking flights without signing in.
+    If you choose to sign in, SkyPulse syncs certain saved items to your account. Sharing a flight or
+    submitting feedback is optional and may make the information you share public.</p>
   </div>
 
-  <h2>No account, no login</h2>
-  <p>SkyPulse does not require you to create an account, sign in, or provide any personal
-  information. There is no user profile and no password.</p>
+  <h2>Accounts and saved data</h2>
+  <p>You can use basic flight tracking without an account. If you choose email or Google sign-in,
+  Firebase Authentication processes account information such as your email address and account
+  ID. When you are signed in, saved aircraft, airports and areas (including area labels and
+  coordinates) are synced to Cloud Firestore under your account. Local alert rules and cached
+  flight data are not part of that account sync.</p>
 
-  <h2>Data stored on your device</h2>
-  <p>Saved aircraft, saved airports, saved search areas, alert rules, cached aircraft snapshots,
-  and the bundled airport/airline database are stored locally on your device. The app does not
-  upload this data anywhere.</p>
+  <h2>Location and live data</h2>
+  <p>If you grant location permission, the app can use your device location to center the map and
+  evaluate local alerts. Aviation and map services receive the requested area or coordinates
+  and normal network information such as your IP address. A request for nearby aircraft or map
+  tiles may reflect the area around your device.</p>
 
-  <h2>Location</h2>
-  <p>If you grant location permission, your location is used only on-device to:</p>
+  <h2>Public flight sharing</h2>
+  <p>If you share a flight, the app stores a snapshot of the aircraft and related flight
+  information in Cloud Firestore and creates a public link. It is not a live feed. The
+  Some snapshots include the Firebase account or anonymous app ID that created the link. Older web links may not include an account reference.</p>
+
+  <h2>Public feedback</h2>
+  <p>If you post a report or comment from the app, GitHub receives the content. If you choose to
+  include a screenshot or device diagnostics, those can also appear publicly on GitHub. Review your attachments and diagnostics selection before submitting, and do not include private information.</p>
+
+  <h2>Diagnostics and app services</h2>
+  <p>Firebase services support app analytics, crash reports, performance measurements,
+  configuration and push notifications. These services can process app usage, device and app
+  identifiers, diagnostic information and push registration data. See <a
+  href="https://firebase.google.com/support/privacy">Firebase privacy information</a>.</p>
+
+  <h2>Website analytics</h2>
+  <p>The SkyPulse website uses Google Analytics to understand visits and usage. Google may process
+    page visits, browser or device information, identifiers, and approximate location derived from IP.
+    See <a href="https://policies.google.com/technologies/partner-sites">how Google uses information from sites and apps</a>.</p>
+
+  <h2>Ads</h2>
+  <p>On Android, AdMob serves banner, interstitial and optional rewarded ads. Google and its partners may
+  process advertising identifiers, IP-based location, ad interactions and technical data to
+  serve and measure ads. The app uses Google’s consent form where required. SkyPulse rewards
+  and the ad-free timer are stored on your device. Read more about <a
+  href="https://policies.google.com/technologies/partner-sites">how Google uses information
+  from apps</a>.</p>
+
+  <p>More information: <a href="https://admob.google.com/">Google AdMob</a>.</p>
+
+  <p>More information: <a href="https://support.google.com/admob/answer/6128543">Google ad controls</a>.</p>
+
+  <h2>Limits of free ADS-B data</h2>
+  <p>Not every aircraft is guaranteed to appear. Coverage varies by area and time, data can be
+  delayed or missing, and some aircraft may be hidden or incomplete. Free feeds may not
+  provide reliable gate, boarding or route status.</p>
+
+  <h2>Third-party aviation and map services</h2>
   <ul>
-    <li>Center the map and find aircraft and airports near you;</li>
-    <li>Evaluate local alert rules (e.g. an aircraft entering your area).</li>
-  </ul>
-  <p>Your location is not transmitted to any SkyPulse backend. When the app queries open aviation
-  APIs for aircraft in an area, only the requested geographic coordinates/bounding box are sent to
-  those third-party services (below) — never an identifier tied to you.</p>
-
-  <h2>Third-party open data services</h2>
-  <p>To show live data, the app makes requests to free, public services. These services may receive
-  the geographic area being queried and standard request metadata (such as your IP address) as part
-  of normal internet requests:</p>
-  <ul>
-    <li><a href="https://www.adsb.lol/">ADSB.lol</a> — live aircraft (primary)</li>
-    <li><a href="https://opensky-network.org/">OpenSky Network</a> — live aircraft (anonymous fallback)</li>
-    <li><a href="https://www.adsbdb.com/">adsbdb</a> — flight route lookup (origin/destination)</li>
+    <li><a href="https://www.adsb.lol/">ADSB.lol</a> — primary live aircraft data in the Android app</li>
+    <li>airplanes.live — live aircraft data in the web app</li>
+    <li><a href="https://opensky-network.org/">OpenSky Network</a> — fallback live aircraft data</li>
+    <li>Flightradar24 — aircraft route lookup around the aircraft’s position</li>
+    <li><a href="https://www.adsbdb.com/">adsbdb</a> — fallback flight route lookup</li>
     <li><a href="https://www.openstreetmap.org/">OpenStreetMap</a> — map tiles</li>
   </ul>
-  <p>Airport and airline reference data from <a href="https://openflights.org/data.php">OpenFlights</a>
-  is bundled in the app and used entirely offline. Please refer to each provider's own policy for how
-  they handle requests.</p>
-
-  <h2>Diagnostics &amp; analytics (Firebase, free tier)</h2>
-  <p>SkyPulse uses Google Firebase on the free (Spark) tier to improve reliability and quality. None
-  of this requires a login or collects personally identifying information:</p>
-  <ul>
-    <li><strong>Crashlytics</strong> — anonymous crash reports;</li>
-    <li><strong>Analytics</strong> — aggregate, non-personal usage events (e.g. which screens are used);</li>
-    <li><strong>Performance Monitoring</strong> — anonymous app performance metrics (e.g. startup time, network request timing) to help us keep the app fast;</li>
-    <li><strong>Remote Config</strong> — feature flags / tunable defaults;</li>
-    <li><strong>Cloud Messaging (FCM)</strong> — optional push for announcements.</li>
-  </ul>
-  <p>Google may process this diagnostic data as described in the
-  <a href="https://firebase.google.com/support/privacy">Firebase privacy documentation</a>.</p>
-
-  <h2>Ads (Google AdMob)</h2>
-  <p>SkyPulse is free and supported by ads delivered through <a href="https://admob.google.com/">Google
-  AdMob</a>. The app shows a banner, occasional full-screen (interstitial) ads, and optional rewarded
-  ads. To serve and measure these ads, Google and its partners may use a device <strong>advertising
-  identifier</strong> and standard request data (such as your IP address). SkyPulse itself still has no
-  account and does not build a profile of you.</p>
-  <ul>
-    <li>On first launch you'll see a <strong>consent choice</strong> (Google's User Messaging Platform)
-      where required by law (e.g. the EEA/UK). You can review or change this later.</li>
-    <li>How Google handles ad data is described in
-      <a href="https://policies.google.com/technologies/partner-sites">Google's policy</a> and the
-      <a href="https://support.google.com/admob/answer/6128543">AdMob documentation</a>.</li>
-  </ul>
-
-  <h2>Ad-free rewards</h2>
-  <p>You can optionally watch rewarded ads to earn credits and unlock blocks of ad-free time (up to a
-  few hours per day). Your credits and ad-free timer are stored <strong>only on your device</strong>,
-  reset daily, and are not linked to any account or sent to a server.</p>
+  <p>Airport and airline reference data from <a href="https://openflights.org/data.php">OpenFlights</a> is bundled in the app.</p>
 
   <h2>Children</h2>
-  <p>SkyPulse is a general-audience aviation utility and is not directed at children, and it does not
-  knowingly collect personal information from anyone.</p>
-
-  <h2>Limits of the data</h2>
-  <p>Free ADS-B data is best-effort: not every aircraft appears, coverage varies, data can be delayed,
-  and some military/private aircraft may be hidden. Route and ETA information is estimated and is not a
-  source of truth for travel planning.</p>
+  <p>SkyPulse is a general-audience aviation utility and is not directed to children.</p>
 
   <h2>Contact</h2>
-  <p>Questions? Open an issue on
-  <a href="https://github.com/chartmann1590/skypulse-android">GitHub</a>.</p>
+  <p>Use the <a href="https://github.com/chartmann1590/skypulse-android">SkyPulse GitHub project</a>
+  for general support. GitHub issues are public: do not post passwords, account information or personal data there.</p>
 
   <footer>
     © SkyPulse · <a href="index.html">Home</a> ·
