@@ -30,6 +30,14 @@ service cloud.firestore {
         && request.resource.data.lat >= -90 && request.resource.data.lat <= 90
         && request.resource.data.lon >= -180 && request.resource.data.lon <= 180;
     }
+    // The still-deployed pre-update PWA publishes only public aircraft fields.
+    // Give cached copies a migration path without accepting any account, profile,
+    // note, or saved-data fields. Remove this compatibility clause after cutover.
+    function preUpgradeWebSnapshot() {
+      return request.resource.data.keys().hasOnly([
+        'hex', 'callsign', 'altFt', 'speedKts', 'headingDeg', 'lat', 'lon', 'createdAt'
+      ]) && request.resource.data.keys().hasAll(['hex', 'lat', 'lon', 'createdAt']);
+    }
     function indexedShareCreated(id) {
       let ref = shareRefPath(request.auth.uid, id);
       return !request.resource.data.keys().hasAny(['sharedBy'])
@@ -56,7 +64,7 @@ service cloud.firestore {
       // Public snapshots remain readable. New clients keep the owner reference private.
       allow read: if true;
       allow create: if acceptsWrites() && validShare() && (
-        indexedShareCreated(id)
+        indexedShareCreated(id) || preUpgradeWebSnapshot()
         || (request.resource.data.keys().hasAny(['sharedBy'])
           && owns(request.resource.data.sharedBy))
       );
