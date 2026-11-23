@@ -81,7 +81,7 @@ fun ReportFormDialog(
     var description by remember { mutableStateOf("") }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var includeDiagnostics by remember { mutableStateOf(true) }
+    var includeDiagnostics by remember { mutableStateOf(false) }
 
     var screenshotBytes by remember { mutableStateOf<ByteArray?>(null) }
     var screenshotFileName by remember { mutableStateOf<String?>(null) }
@@ -155,7 +155,7 @@ fun ReportFormDialog(
                         modifier = Modifier.size(20.dp)
                     )
                     Text(
-                        text = "Warning: Everything submitted (including screenshot and comments) will be public on GitHub. Do not include passwords or sensitive personal keys.",
+                        text = "Your report and comments are public on GitHub. Optional screenshots and diagnostics are public too. Remove personal details before submitting.",
                         style = SkyType.LabelSm,
                         color = SkyColors.Error,
                         modifier = Modifier.weight(1f)
@@ -229,12 +229,12 @@ fun ReportFormDialog(
                             Spacer(modifier = Modifier.width(4.dp))
                             Column {
                                 Text(
-                                    text = "Include system diagnostics & active models",
+                                    text = "Include device diagnostics in the public report",
                                     style = SkyType.BodyMd,
                                     color = SkyColors.OnSurface
                                 )
                                 Text(
-                                    text = "Brand, SDK level, Locale, Storage, RAM, and Ollama tags. No IP/API keys.",
+                                    text = "Device model, Android and app versions, language, memory, and storage.",
                                     style = SkyType.LabelSm,
                                     color = SkyColors.OnSurfaceVariant
                                 )

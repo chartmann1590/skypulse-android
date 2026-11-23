@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Delete your SkyPulse account | SkyPulse</title>
+  <style>
+    :root { color-scheme: dark; font: 100%/1.55 system-ui,sans-serif; background:#101820; color:#eee; }
+    main { max-width:36rem; margin:auto; padding:clamp(1rem,5vw,3rem); }
+    h1 { line-height:1.12; font-size:clamp(1.8rem,6vw,2.65rem); }
+    h2 { font-size:1.25rem; } a { color:#83e8f1; text-underline-offset:3px; }
+    section { background:#1a2732; border:1px solid #465f71; border-radius:12px; padding:1.2rem; margin:1rem 0; }
+    strong, #account-name { overflow-wrap:anywhere; }
+    label { display:block; margin-top:1rem; }
+    input:not([type=radio]), button { box-sizing:border-box; width:100%; max-width:26rem; font:inherit; }
+    input:not([type=radio]) { background:#101820; color:#fff; border:1px solid #94adbe; padding:.64rem; border-radius:5px; }
+    button { border:1px solid #f3b5ab; border-radius:6px; background:#ffc6bb; color:#2a1714; font-weight:700; padding:.7rem; margin-top:1rem; }
+    button:disabled { background:#8895a0; border-color:#8895a0; color:#17232b; }
+    :focus-visible { outline:3px solid #83e8f1; outline-offset:4px; }
+    fieldset { border:0; margin:1rem 0 0; padding:0; } legend { font-weight:700; }
+    [hidden] { display:none !important; }
+  </style>
+</head>
+<body>
+<main>
+  <nav aria-label="SkyPulse"><a href="./index.html">SkyPulse</a> · <a href="./privacy.html">Privacy policy</a></nav>
+  <h1>Delete your SkyPulse account</h1>
+  <p>You can do this in your browser. You do not need to install the Android app.</p>
+  <section aria-labelledby="deletion-scope">
+    <h2 id="deletion-scope">What gets deleted</h2>
+    <p>Your SkyPulse sign-in, synced aircraft, airports and areas, and public flight links associated with your account. This cannot be undone.</p>
+    <p>This does not delete your Google account, data stored only on your devices, older guest and unattributed share links, or feedback that you chose to post publicly on GitHub. Clear the SkyPulse app or browser storage separately if you want to remove local data.</p>
+    <p>SkyPulse keeps a restricted record of the former account ID and deletion time to prevent old sessions from restoring deleted data. It contains no email address or saved items.</p>
+  </section>
+  <p id="status" aria-live="polite" role="status">Checking SkyPulse sign-in…</p>
+  <section id="signin-panel" aria-labelledby="signin-title" hidden>
+    <h2 id="signin-title">Sign in to SkyPulse</h2>
+    <p>Use the email and password or Google account you used to create your SkyPulse account.</p>
+    <button type="button" id="signin-google">Sign in with Google</button>
+    <form id="signin-form" method="post">
+      <label for="signin-email">SkyPulse email</label>
+      <input id="signin-email" type="email" autocomplete="username" required>
+      <label for="signin-password">SkyPulse password</label>
+      <input id="signin-password" type="password" autocomplete="current-password" required>
+      <button type="submit">Sign in with email</button>
+      <button type="button" id="reset-password">Send a password reset email</button>
+    </form>
+  </section>
+  <noscript><p>Enable JavaScript to sign in and securely delete your SkyPulse account.</p></noscript>
+  <section id="confirm-panel" aria-labelledby="confirm-title" hidden>
+    <h2 id="confirm-title">Confirm your account</h2>
+    <p>Signed in as <strong id="account-name"></strong>. If this is not the account you want to delete, <button type="button" id="switch-account">Sign out and switch accounts</button></p>
+    <form id="delete-form" method="post" autocomplete="off">
+      <fieldset id="methods">
+        <legend>Verify it’s you</legend>
+        <label id="method-google" hidden><input type="radio" name="method" value="google.com" disabled> Verify with Google</label>
+        <label id="method-email" hidden><input type="radio" name="method" value="password" disabled> Verify with your SkyPulse password</label>
+      </fieldset>
+      <div id="password-row" hidden>
+        <label for="password">SkyPulse password</label>
+        <input id="password" type="password" autocomplete="current-password" disabled>
+      </div>
+      <label for="confirmation">Type DELETE to confirm</label>
+      <input id="confirmation" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" required maxlength="6" pattern="DELETE">
+      <button id="submit-deletion" type="submit" disabled>Permanently delete my account</button>
+    </form>
+  </section>
+</main>
+<script type="module" src="./account-deletion-ui.js"></script>
+</body>
+</html>

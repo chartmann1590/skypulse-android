@@ -3,7 +3,6 @@ package com.charles.skypulse.app.di
 import com.charles.skypulse.app.data.remote.AdsbDbApi
 import com.charles.skypulse.app.data.remote.AdsbLolApi
 import com.charles.skypulse.app.data.remote.ApiEndpoints
-import com.charles.skypulse.app.data.remote.Fr24Api
 import com.charles.skypulse.app.data.remote.OpenSkyApi
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
@@ -13,7 +12,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -34,9 +32,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttp(): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
-        }
+        // Do not log request URLs: flight searches can include device coordinates.
         // Allow many concurrent requests per host so airport route lookups (one per nearby
         // aircraft) fan out quickly.
         val dispatcher = okhttp3.Dispatcher().apply {
@@ -49,7 +45,7 @@ object NetworkModule {
             .readTimeout(20, TimeUnit.SECONDS)
             .addInterceptor { chain ->
                 // Identify the client to the open APIs, but don't clobber a per-request
-                // User-Agent (FR24's feed needs a browser UA set via @Headers).
+                // User-Agent (no endpoint needs a spoofed browser UA).
                 val original = chain.request()
                 val request = if (original.header("User-Agent") == null) {
                     original.newBuilder()
@@ -60,7 +56,6 @@ object NetworkModule {
                 }
                 chain.proceed(request)
             }
-            .addInterceptor(logging)
             .build()
     }
 
@@ -108,21 +103,6 @@ object NetworkModule {
     @Singleton
     fun provideAdsbDbApi(@AdsbDbRetrofit retrofit: Retrofit): AdsbDbApi =
         retrofit.create(AdsbDbApi::class.java)
-
-    @Provides
-    @Singleton
-    @Fr24Retrofit
-    fun provideFr24Retrofit(client: OkHttpClient, json: Json): Retrofit =
-        Retrofit.Builder()
-            .baseUrl(ApiEndpoints.FR24_BASE_URL)
-            .client(client)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
-
-    @Provides
-    @Singleton
-    fun provideFr24Api(@Fr24Retrofit retrofit: Retrofit): Fr24Api =
-        retrofit.create(Fr24Api::class.java)
 
     // Talks to the cloudflare-worker/ feedback relay, not api.github.com directly — the
     // Worker holds the GitHub token as a server-side secret and hardcodes this app's own

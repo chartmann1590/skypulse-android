@@ -49,7 +49,7 @@ Instantly see what's flying near you, ranked by distance, altitude or speed. Eac
 Tap any aircraft to open a live detail card with altitude, ground speed, heading, vertical rate and last-seen time. Watch the numbers update as the flight climbs, cruises or descends.
 
 ★ AIRPORTS AROUND YOU
-Browse the airports nearest to you and jump straight into their arrivals, departures and live activity. A built-in airport database means it works the moment you open the app.
+Browse the airports nearest to you and jump straight into the live aircraft activity around them. A built-in airport database means it works the moment you open the app.
 
 ★ SMART FLIGHT ALERTS
 Never miss the flights that matter. Set custom push alerts for:
@@ -68,7 +68,7 @@ Whether you're an aviation enthusiast, a frequent flyer tracking a friend's plan
 WHY SKYPULSE?
 • Real-time, map-based flight tracking
 • Clean, modern, dark-themed design
-• No account or sign-up required
+• No account or sign-up required — optional sign-in syncs your saved items
 • Lightweight and fast
 • Works great for plane spotting and aviation fans
 
@@ -108,6 +108,7 @@ flight status, air traffic, plane radar, aircraft radar
 | **Content rating** | Everyone *(complete the IARC questionnaire in Play Console)* |
 | **Contains ads** | Yes (AdMob) |
 | **In-app purchases** | No |
+| **Account deletion** | In-app (Profile) and web: https://chartmann1590.github.io/skypulse-android/delete-account.html |
 | **Free / Paid** | Free |
 
 ---
@@ -124,14 +125,15 @@ flight status, air traffic, plane radar, aircraft radar
 
 ## Data safety (Play Console → App content → Data safety)
 
-SkyPulse requires no account/login. Declare based on the app's actual behavior:
+SkyPulse does not require an account, but optional email/Google sign-in syncs saved items via Cloud Firestore, and accounts can be deleted in-app or at https://chartmann1590.github.io/skypulse-android/delete-account.html. Declare based on the app's actual behavior:
 
 - **Location** — *Approximate & precise location* used for the live map, nearby
-  aircraft and location-based alerts. Processed on-device / sent to ADS-B data
-  providers only to fetch nearby aircraft. Not used for advertising tracking by
-  the app itself.
-- **Analytics / Crash data** — Firebase Analytics, Crashlytics & Performance
-  collect app activity, diagnostics and device identifiers.
+  aircraft and location-based alerts. Precise coordinates are sent to ADSB.lol
+  (or the search area to OpenSky) to fetch nearby aircraft. Not used for
+  advertising tracking by the app itself.
+- **Analytics / Crash data** — Firebase Analytics & Crashlytics collect app
+  activity, diagnostics and device identifiers. (Firebase Performance was
+  removed from the app; do not declare it.)
 - **Advertising** — Google AdMob (with the Google UMP consent flow) may collect
   device/advertising identifiers for ads.
 - Review Firebase & AdMob SDK disclosures when filling the questionnaire.

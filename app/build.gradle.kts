@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
-    alias(libs.plugins.firebase.perf)
 }
 
 import java.util.Properties
@@ -42,8 +41,8 @@ android {
         applicationId = "com.charles.skypulse.app"
         minSdk = 26
         targetSdk = 37
-        versionCode = 45
-        versionName = "1.0.1"
+        versionCode = 46
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
@@ -175,7 +174,6 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.config)
     implementation(libs.firebase.messaging)
-    implementation(libs.firebase.perf)
 
     // Ads (AdMob) + Google UMP consent
     implementation(libs.play.services.ads)

@@ -1,0 +1,63 @@
+name: SkyPulse recovery build only
+
+on:
+  push:
+    branches: [play-recovery/skypulse-account-deletion-20261122]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.repository == 'chartmann1590/skypulse-android' && github.ref == 'refs/heads/play-recovery/skypulse-account-deletion-20261122'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v6
+        with:
+          cache-read-only: true
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          package-manager-cache: false
+      - run: node --experimental-default-type=module --test tests/skypulse-account-deletion.test.js
+      - name: Write google-services.json from secret
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          python - <<'PY'
+          import base64
+          import json
+          import os
+          from pathlib import Path
+
+          value = os.environ["GOOGLE_SERVICES_JSON"].strip()
+          if value.startswith("{"):
+              config = value
+          else:
+              config = base64.b64decode(value).decode("utf-8")
+          json.loads(config)
+          Path("app/google-services.json").write_text(config)
+          PY
+
+      - name: Validate Firebase auth config
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          config = json.loads(Path("app/google-services.json").read_text())
+          oauth_clients = config["client"][0].get("oauth_client", [])
+          assert any(client.get("client_type") == 1 for client in oauth_clients), "missing Android OAuth client"
+          assert any(client.get("client_type") == 3 for client in oauth_clients), "missing web OAuth client"
+          PY
+
+      - name: Validate Android without publishing or signing a release
+        run: bash ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --no-daemon --stacktrace

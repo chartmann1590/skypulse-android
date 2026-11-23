@@ -87,6 +87,7 @@ function _renderModal() {
         <span class="material-symbols-outlined text-[20px]">logout</span>
         Sign Out
       </button>
+      <a href="../delete-account.html" class="inline-block mt-4 underline text-error">Delete account and data</a>
     </div>
 
     <!-- Sign in / Create forms -->

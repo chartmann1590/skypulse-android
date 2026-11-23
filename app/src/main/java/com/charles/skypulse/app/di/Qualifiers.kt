@@ -20,8 +20,4 @@ annotation class AdsbDbRetrofit
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-annotation class Fr24Retrofit
-
-@Qualifier
-@Retention(AnnotationRetention.BINARY)
 annotation class GitHubRetrofit
