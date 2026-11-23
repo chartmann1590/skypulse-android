@@ -31,11 +31,9 @@ object ApiEndpoints {
     // Docs: https://www.adsbdb.com/  — no API key, no login required.
     const val ADSBDB_BASE_URL = "https://api.adsbdb.com/"
 
-    // ---- Flightradar24 live feed (unofficial, keyless) ----
-    // Returns per-aircraft position AND origin/destination airports in a bounding box. Used to
-    // build accurate airport arrival/departure boards. Unofficial endpoint; may change.
-    const val FR24_BASE_URL = "https://data-cloud.flightradar24.com/"
-    const val FR24_FEED_PATH = "zones/fcgi/feed.js"
+    // NOTE: The unofficial Flightradar24 feed was removed for Play compliance (it required
+    // spoofed browser headers to bypass a 403). Route lookup uses adsbdb only; live positions
+    // come from ADSB.lol / OpenSky above.
 
     /** ADSB.lol caps radius at 250 NM. */
     const val MAX_RADIUS_NM = 250

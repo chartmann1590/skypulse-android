@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.charles.skypulse.app.data.firebase.Analytics
 import com.charles.skypulse.app.data.location.LocationProvider
-import com.charles.skypulse.app.data.remote.Fr24FeedDataSource
-import com.charles.skypulse.app.data.remote.Fr24Flight
 import com.charles.skypulse.app.data.remote.RemoteAircraftDataSource
 import com.charles.skypulse.app.data.repository.AirportRepository
 import com.charles.skypulse.app.data.repository.RouteRepository
@@ -20,7 +18,6 @@ import com.charles.skypulse.app.domain.model.FlightRoute
 import com.charles.skypulse.app.domain.model.RouteProgress
 import com.charles.skypulse.app.domain.model.SharedFlight
 import com.charles.skypulse.app.domain.util.FetchResult
-import com.charles.skypulse.app.domain.util.GeoUtils
 import com.charles.skypulse.app.domain.util.RouteEstimator
 import com.charles.skypulse.app.ui.screens.map.ShareEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -58,7 +55,6 @@ data class AirportFlight(
 class AirportViewModel @Inject constructor(
     private val airportRepository: AirportRepository,
     private val remoteDataSource: RemoteAircraftDataSource,
-    private val fr24: Fr24FeedDataSource,
     private val savedRepository: SavedRepository,
     private val routeRepository: RouteRepository,
     private val locationProvider: LocationProvider,
@@ -128,10 +124,8 @@ class AirportViewModel @Inject constructor(
     }
 
     /**
-     * Show flights arriving at / departing from this airport. Uses the FR24 live feed (one
-     * bounding-box call) which carries each aircraft's real origin/destination — so en route
-     * arrivals and just-departed flights are included. Works for any airport. Falls back to a
-     * plain nearby list (ADS-B, no routes) if FR24 is unavailable.
+     * Show flights near this airport from ADS-B (ADSB.lol). Route labels are resolved
+     * per flight via adsbdb when one is selected; the board itself lists nearby aircraft.
      */
     fun viewAircraftNear(airport: Airport) {
         _focusAirport.value = airport
@@ -146,61 +140,10 @@ class AirportViewModel @Inject constructor(
         }
     }
 
-    private suspend fun loadAirportFlights(airport: Airport): List<AirportFlight> {
-        val codes = listOfNotNull(
-            airport.iata?.trim()?.uppercase()?.ifEmpty { null },
-            airport.icao?.trim()?.uppercase()?.ifEmpty { null },
-        ).toSet()
+    private suspend fun loadAirportFlights(airport: Airport): List<AirportFlight> =
+        fallbackNearby(airport)
 
-        val feed = fr24.flightsAround(airport.latitude, airport.longitude, AIRPORT_RADIUS_NM.toDouble())
-        if (feed.isNotEmpty() && codes.isNotEmpty()) {
-            val flights = feed.mapNotNull { f -> f.toAirportFlight(airport, codes) }
-                .sortedWith(compareBy({ it.role.ordinal }, { it.aircraft.distanceNm ?: Double.MAX_VALUE }))
-            // Prefer routed (arriving/departing) but always include some nearby context.
-            val routed = flights.filter { it.role != FlightRole.NEARBY }
-            val nearby = flights.filter { it.role == FlightRole.NEARBY }
-                .take((MAX_DISPLAY - routed.size).coerceAtLeast(MIN_NEARBY))
-            return (routed + nearby).take(MAX_DISPLAY)
-        }
-        return fallbackNearby(airport)
-    }
-
-    private suspend fun Fr24Flight.toAirportFlight(airport: Airport, codes: Set<String>): AirportFlight? {
-        val lat = latitude ?: return null
-        val lon = longitude ?: return null
-        val id = hex ?: callsign ?: flightNumber ?: return null
-        val dist = GeoUtils.haversineNm(airport.latitude, airport.longitude, lat, lon)
-        val ac = Aircraft(
-            id = id,
-            callsign = (callsign ?: flightNumber)?.trim()?.ifEmpty { null },
-            hex = hex,
-            latitude = lat,
-            longitude = lon,
-            altitudeFeet = altitudeFeet,
-            speedKnots = groundSpeedKnots,
-            headingDegrees = trackDeg,
-            verticalRate = verticalRate,
-            originCountry = null,
-            lastSeenEpochSeconds = timestampSeconds,
-            source = DataSource.FR24,
-            typeCode = aircraftType,
-            onGround = onGround,
-            distanceNm = dist,
-        )
-        val role = when {
-            destinationIata != null && destinationIata in codes -> FlightRole.ARRIVING
-            originIata != null && originIata in codes -> FlightRole.DEPARTING
-            else -> FlightRole.NEARBY
-        }
-        val route = if (role != FlightRole.NEARBY) {
-            routeRepository.buildRoute(callsign ?: flightNumber ?: id, originIata, destinationIata)
-        } else {
-            null
-        }
-        return AirportFlight(ac, role, route)
-    }
-
-    /** Fallback when FR24 is unavailable: nearest aircraft from ADS-B, no route labels. */
+    /** Nearest aircraft from ADS-B around the airport, no route labels. */
     private suspend fun fallbackNearby(airport: Airport): List<AirportFlight> {
         val result = remoteDataSource.fetchFromAdsbLol(airport.latitude, airport.longitude, AIRPORT_RADIUS_NM)
         return (result as? FetchResult.Success)?.aircraft.orEmpty()
@@ -220,8 +163,8 @@ class AirportViewModel @Inject constructor(
         _selectedRoute.value = null
         _selectedProgress.value = null
         viewModelScope.launch {
-            // Prefer the route already resolved for this flight on the airport board (FR24 may
-            // drop a flight's destination once it lands, so re-fetching can come back empty).
+            // Prefer the route already resolved for this flight on the airport board
+            // (re-fetching can come back empty once a flight lands).
             val known = _focusFlights.value.firstOrNull { it.aircraft.id == aircraft.id }?.route
             val route = known ?: routeRepository.routeForAircraft(aircraft)
             if (route != null && _selected.value?.id == aircraft.id) {

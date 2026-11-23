@@ -42,7 +42,7 @@ fun PrivacyScreen(onBack: () -> Unit) {
             )
             Section(
                 "Location and live data",
-                "If you grant location permission, SkyPulse uses your device location to center the map, find nearby aircraft, and check location-based alerts. A nearby-aircraft request can send your precise device coordinates to ADS-B.lol or the surrounding search area to OpenSky. Map providers receive tile requests for the visible area. These services also receive network information such as your IP address. If you deny location permission, SkyPulse can still show aircraft around a default or selected area. Flightradar24 and adsbdb receive aircraft-related route lookups.",
+                "If you grant location permission, SkyPulse uses your device location to center the map, find nearby aircraft, and check location-based alerts. A nearby-aircraft request can send your precise device coordinates to ADS-B.lol or the surrounding search area to OpenSky. Map providers receive tile requests for the visible area. These services also receive network information such as your IP address. If you deny location permission, SkyPulse can still show aircraft around a default or selected area. adsbdb receives aircraft-related route lookups.",
             )
             Section(
                 "Public flight sharing",
