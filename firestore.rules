@@ -33,10 +33,22 @@ service cloud.firestore {
     // The still-deployed pre-update PWA publishes only public aircraft fields.
     // Give cached copies a migration path without accepting any account, profile,
     // note, or saved-data fields. Remove this compatibility clause after cutover.
+    function shortString(field, maxLength) {
+      return field is string && field.size() <= maxLength;
+    }
+    function numberOrNull(field) {
+      return field == null || field is number;
+    }
     function preUpgradeWebSnapshot() {
       return request.resource.data.keys().hasOnly([
         'hex', 'callsign', 'altFt', 'speedKts', 'headingDeg', 'lat', 'lon', 'createdAt'
-      ]) && request.resource.data.keys().hasAll(['hex', 'lat', 'lon', 'createdAt']);
+      ]) && request.resource.data.keys().hasAll(['hex', 'lat', 'lon', 'createdAt'])
+        && shortString(request.resource.data.hex, 16)
+        && (request.resource.data.get('callsign', null) == null
+          || shortString(request.resource.data.callsign, 24))
+        && numberOrNull(request.resource.data.get('altFt', null))
+        && numberOrNull(request.resource.data.get('speedKts', null))
+        && numberOrNull(request.resource.data.get('headingDeg', null));
     }
     function indexedShareCreated(id) {
       let ref = shareRefPath(request.auth.uid, id);

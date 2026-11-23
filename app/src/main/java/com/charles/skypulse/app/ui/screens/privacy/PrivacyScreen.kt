@@ -42,7 +42,7 @@ fun PrivacyScreen(onBack: () -> Unit) {
             )
             Section(
                 "Location and live data",
-                "If you grant location permission, the app can use your device location to center the map and evaluate local alerts. Aviation and map services receive the requested area or coordinates and normal network information such as your IP address. A request for nearby aircraft or map tiles may reflect the area around your device. Flightradar24 and adsbdb receive aircraft-related route lookups.",
+                "If you grant location permission, SkyPulse uses your device location to center the map, find nearby aircraft, and check location-based alerts. A nearby-aircraft request can send your precise device coordinates to ADS-B.lol or the surrounding search area to OpenSky. Map providers receive tile requests for the visible area. These services also receive network information such as your IP address. If you deny location permission, SkyPulse can still show aircraft around a default or selected area. Flightradar24 and adsbdb receive aircraft-related route lookups.",
             )
             Section(
                 "Public flight sharing",
@@ -54,7 +54,7 @@ fun PrivacyScreen(onBack: () -> Unit) {
             )
             Section(
                 "Public feedback",
-                "If you post a report or comment from the app, GitHub receives the content. If you choose to attach a screenshot or system diagnostics, those can also appear publicly on GitHub. Do not include private information. System diagnostics are off by default in this version.",
+                "If you post a report or comment from the app, the content passes through a Cloudflare-hosted service to GitHub. If you choose to attach a screenshot or system diagnostics, those can also appear publicly on GitHub. Do not include private information. System diagnostics are off by default in this version.",
             )
             Section(
                 "Diagnostics and app services",

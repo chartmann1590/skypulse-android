@@ -6,7 +6,6 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.google.services)
     alias(libs.plugins.firebase.crashlytics)
-    alias(libs.plugins.firebase.perf)
 }
 
 import java.util.Properties
@@ -175,7 +174,6 @@ dependencies {
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.config)
     implementation(libs.firebase.messaging)
-    implementation(libs.firebase.perf)
 
     // Ads (AdMob) + Google UMP consent
     implementation(libs.play.services.ads)

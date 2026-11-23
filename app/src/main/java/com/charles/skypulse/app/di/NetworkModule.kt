@@ -13,7 +13,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
@@ -34,9 +33,7 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttp(): OkHttpClient {
-        val logging = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BASIC
-        }
+        // Do not log request URLs: flight searches can include device coordinates.
         // Allow many concurrent requests per host so airport route lookups (one per nearby
         // aircraft) fan out quickly.
         val dispatcher = okhttp3.Dispatcher().apply {
@@ -60,7 +57,6 @@ object NetworkModule {
                 }
                 chain.proceed(request)
             }
-            .addInterceptor(logging)
             .build()
     }
 
