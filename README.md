@@ -4,7 +4,7 @@
 planes near you on a map in real time — tap any aircraft to see its altitude, speed,
 heading, and (when available) where it's flying from and to.
 
-No account. No sign-up. No API key. Just open it and look up.
+No API key. Core tracking works with no account — optional sign-in (email or Google) syncs your saved items.
 
 <p align="center">
   <em>Map-first · Privacy-first · Free</em>
@@ -75,8 +75,11 @@ best-effort:
 
 ## Privacy
 
-No account, no login. Your saved items and alerts stay on your device. Your location is used
-only on your device to find nearby aircraft and evaluate alerts. The app shows ads via Google
+An account is optional, not required: you can use SkyPulse signed out. If you sign in
+(email or Google), your saved aircraft, airports and areas sync through Cloud Firestore;
+otherwise they stay on your device. Your location is used to center the map, find nearby
+aircraft and evaluate alerts — a nearby-aircraft request can send your precise coordinates
+to ADSB.lol or the surrounding search area to OpenSky. The app shows ads via Google
 AdMob and collects anonymous diagnostics to stay reliable — full details are in the in-app
 **Privacy** screen and the
 [Privacy Policy](https://chartmann1590.github.io/skypulse-android/privacy.html).
